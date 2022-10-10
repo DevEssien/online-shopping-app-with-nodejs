@@ -1,4 +1,4 @@
-const products = [];
+const Product = require('../models/product')
 
 //GET
 const prodGetRoute = (req, res, next) => {
@@ -14,12 +14,12 @@ const prodGetRoute = (req, res, next) => {
 //POST
 const prodPostRoute = (req, res, next) => {
     const { title } = req.body;
-    products.push({ title: title});
+    const product = new Product(title);
+    product.save();
     res.redirect('/');
 };
 
 module.exports = {
     prodGetRoute,
-    prodPostRoute,
-    products
+    prodPostRoute
 };
