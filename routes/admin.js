@@ -1,17 +1,32 @@
 const express = require('express');
 const path = require('path');
 
-const  { prodGetRoute, prodPostRoute} = require('../controllers/products');
+const  { 
+    getAddProduct, 
+    getProducts,
+    getEditProduct,
+    postProduct,
+    postEditProduct,
+    postDeleteProduct
+} = require('../controllers/admin');
 
 
 const router = express.Router();
 
-router.get('/add-product', prodGetRoute);
 
-router.get('/product', (req, res, next) => {
-    res.status(200).send('getting a product');
-});
+//GET
+router.get('/add-product', getAddProduct);
 
-router.post('/add-product', prodPostRoute);
+router.get('/products', getProducts);
+
+router.get('/edit-product', getEditProduct);
+
+//POST
+router.post('/add-product', postProduct);
+
+router.post('/edit-product', postEditProduct);
+
+router.post('/delete-product', postDeleteProduct)
+
 
 module.exports = router;

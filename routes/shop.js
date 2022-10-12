@@ -1,12 +1,26 @@
 const express = require('express');
 const path = require('path');
 
-const homeGetRoute = require('../controllers/shop');
+const {
+    getProductList,
+    getIndex,
+    getCart,
+    getOrders,
+    getCheckout
+} = require('../controllers/shop');
 
 
 const router = express.Router();
 
-router.get('/', homeGetRoute);
+router.get('/', getIndex);
+
+router.get('/products', getProductList);
+
+router.get('/cart', getCart);
+
+router.get('/orders', getOrders)
+
+router.get('/checkout', getCheckout)
 
 
 

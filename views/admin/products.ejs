@@ -1,8 +1,8 @@
-<%- include('includes/head.ejs') %>
+<%- include('../includes/head.ejs') %>
 </head>
 
 <body>
-    <%- include('includes/navigation.ejs') %>
+    <%- include('../includes/navigation.ejs') %>
 
     <main>
         <% if (products.length > 0) { %>
@@ -17,11 +17,14 @@
                                 alt="A Book">
                         </div>
                         <div class="card__content">
-                            <h2 class="product__price">$<%= price %></h2>
-                            <p class="product__description">A very interesting book about so many even more interesting things!</p>
+                            <h2 class="product__price">$<%= product.price %></h2>
+                            <p class="product__description"><%= product.description %></p>
                         </div>
                         <div class="card__actions">
-                            <button class="btn">Add to Cart</button>
+                            <a href="/admin/edit-product" class="btn">Edit</a>
+                            <form action="/admin/delete-product" method="POST">
+                                <button class="btn" type="submit">Delete</button>
+                            </form>
                         </div>
                     </article>
                 <% }) %>  
@@ -30,5 +33,5 @@
             <h1>No Product Found!</h1>
         <% } %>
 
-<%- include('includes/end.ejs') %>
+<%- include('../includes/end.ejs') %>
 
