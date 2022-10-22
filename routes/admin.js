@@ -5,7 +5,6 @@ const {
     getAddProduct,
     getProducts,
     getEditProduct,
-    getDeleteProduct,
     postAddProduct,
     postEditProduct,
     postDeleteProduct,
@@ -19,8 +18,6 @@ router.get("/add-product", getAddProduct);
 router.get("/products", getProducts);
 
 router.get("/edit-product/:productId", getEditProduct);
-
-router.get("/delete-product", getDeleteProduct);
 
 //POST
 router.post("/add-product", postAddProduct);

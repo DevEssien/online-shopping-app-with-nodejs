@@ -2,34 +2,64 @@ const Product = require("../models/product");
 const Cart = require("../models/cart");
 
 const getIndex = async (req, res, next) => {
-    Product.fetchAll(async (products) => {
+    try {
+        const products = await Product.findAll();
+        if (!products)
+            return res
+                .status(404)
+                .send({ status: "Error", message: "No Record Found" });
         res.render("shop/index", {
             path: "/",
             pageTitle: "Shop",
-            products: await products,
+            products: products,
         });
-    });
+    } catch (error) {
+        console.log("error: ", error);
+        return res
+            .status(500)
+            .send({ status: "Error", message: "Internal Server Error" });
+    }
 };
 
-const getProductList = (req, res, next) => {
-    Product.fetchAll(async (products) => {
+const getProductList = async (req, res, next) => {
+    try {
+        const products = await Product.findAll();
+        if (!products)
+            return res
+                .status(404)
+                .send({ status: "Error", message: "No Record Found" });
         res.render("shop/product-list", {
             path: "/products",
             pageTitle: "Shop",
-            products: await products,
+            products: products,
         });
-    });
+    } catch (error) {
+        console.log("error: ", error);
+        return res
+            .status(500)
+            .send({ status: "Error", message: "Internal Server Error" });
+    }
 };
 
-const getProductDetails = (req, res, next) => {
-    const productId = req.params.productId;
-    Product.findById(productId, (product) => {
+const getProductDetails = async (req, res, next) => {
+    const productId = req?.params?.productId;
+    try {
+        const product = await Product.findOne({ where: { id: productId } });
+        if (!product)
+            return res
+                .status(404)
+                .send({ status: "Error", message: "Not Found" });
         res.render("shop/product-detail", {
             path: "/products",
             pageTitle: "Product Details",
             product: product,
         });
-    });
+    } catch (error) {
+        console.log("error: ", error);
+        return res
+            .status(500)
+            .send({ status: "Error", message: "Internal Server Error" });
+    }
 };
 
 const getCart = (req, res, next) => {
@@ -37,13 +67,13 @@ const getCart = (req, res, next) => {
         const cartProducts = [];
         Product.fetchAll((products) => {
             for (const product of products) {
-                const cartProductData = cart.products.find(
-                    (prod) => prod.id == product.id
+                const cartProductData = cart?.products.find(
+                    (prod) => prod.id == product?.id
                 );
                 if (cartProductData) {
                     cartProducts.push({
                         productData: product,
-                        qty: product.qty,
+                        qty: product?.qty,
                     });
                 }
             }
@@ -80,9 +110,9 @@ const postCart = (req, res, next) => {
 };
 
 const postDelCartItems = (req, res, next) => {
-    const prodId = req.body.productId;
+    const prodId = req?.body?.productId;
     Product.findById((product) => {
-        Cart.deleteProduct(prodId, product.price);
+        Cart.deleteProduct(prodId, product?.price);
         res.redirect("/cart");
     });
 };
