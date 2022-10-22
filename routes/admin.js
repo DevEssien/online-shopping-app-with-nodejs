@@ -5,7 +5,8 @@ const {
     getAddProduct,
     getProducts,
     getEditProduct,
-    postProduct,
+    getDeleteProduct,
+    postAddProduct,
     postEditProduct,
     postDeleteProduct,
 } = require("../controllers/admin");
@@ -19,8 +20,10 @@ router.get("/products", getProducts);
 
 router.get("/edit-product/:productId", getEditProduct);
 
+router.get("/delete-product", getDeleteProduct);
+
 //POST
-router.post("/add-product", postProduct);
+router.post("/add-product", postAddProduct);
 
 router.post("/edit-product", postEditProduct);
 

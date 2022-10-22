@@ -39,20 +39,40 @@ const getEditProduct = (req, res, next) => {
     });
 };
 
+const getDeleteProduct = (req, res, next) => {
+    res.send("working");
+};
+
 //POST
-const postProduct = (req, res, next) => {
+const postAddProduct = (req, res, next) => {
     const { title, imageUrl, description, price } = req.body;
-    const product = new Product(title, imageUrl, description, price);
+    const product = new Product(null, title, imageUrl, description, price);
     product.save();
     res.redirect("/");
 };
 
 const postEditProduct = (req, res, next) => {
-    res.status(200).send("<h1>Product Edited");
+    const {
+        productId: updatedProductId,
+        title: updatedTitle,
+        imageUrl: updatedImageUrl,
+        description: updatedDescription,
+        price: updatedPrice,
+    } = req.body;
+    const updatedProduct = new Product(
+        updatedProductId,
+        updatedTitle,
+        updatedImageUrl,
+        updatedDescription,
+        updatedPrice
+    );
+    updatedProduct.save();
+    res.redirect("/admin/products");
 };
 
 const postDeleteProduct = (req, res, next) => {
-    //code to delete product
+    const productId = req.body.productId;
+    Product.deleteById(productId);
     res.redirect("/admin/products");
 };
 
@@ -60,7 +80,8 @@ module.exports = {
     getAddProduct,
     getProducts,
     getEditProduct,
-    postProduct,
+    getDeleteProduct,
+    postAddProduct,
     postEditProduct,
     postDeleteProduct,
 };
