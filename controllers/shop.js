@@ -1,5 +1,4 @@
 const Product = require("../models/product");
-const Cart = require("../models/cart");
 
 const getIndex = async (req, res, next) => {
     try {

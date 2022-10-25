@@ -60,7 +60,7 @@ const getEditProduct = async (req, res, next) => {
 const postAddProduct = async (req, res, next) => {
     try {
         const { title, imageUrl, description, price } = req?.body;
-        await Product.create({
+        req.user.createProduct({
             title: title,
             imageUrl: imageUrl,
             price: price,
