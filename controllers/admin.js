@@ -11,7 +11,7 @@ const getAddProduct = (req, res, next) => {
 
 const getProducts = async (req, res, next) => {
     try {
-        const products = await Product.findAll();
+        const products = await req.user.getProducts();
         if (!products)
             return res
                 .status(404)
@@ -37,7 +37,10 @@ const getEditProduct = async (req, res, next) => {
     }
     const productId = req?.params?.productId;
     try {
-        const product = await Product.findOne({ where: { id: productId } });
+        const products = await req.user.getProducts({
+            where: { id: productId },
+        });
+        const product = products[0];
         if (!product) {
             return res.redirect("/");
         }
@@ -60,7 +63,7 @@ const getEditProduct = async (req, res, next) => {
 const postAddProduct = async (req, res, next) => {
     try {
         const { title, imageUrl, description, price } = req?.body;
-        req.user.createProduct({
+        await req.user.createProduct({
             title: title,
             imageUrl: imageUrl,
             price: price,

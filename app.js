@@ -11,6 +11,8 @@ const errorController = require("./controllers/error");
 const sequelize = require("./utils/database");
 const Product = require("./models/product");
 const User = require("./models/user");
+const Cart = require("./models/cart");
+const CartItem = require("./models/cart-item");
 
 const port = 3000;
 
@@ -43,15 +45,21 @@ app.use(shopRoute);
 app.use("/admin", adminRoute);
 
 User.hasMany(Product);
-
 Product.belongsTo(User, {
     constraints: true,
     onDelete: "CASCADE",
 });
 
+User.hasOne(Cart);
+Cart.belongsTo(User);
+
+Product.belongsToMany(Cart, { through: CartItem });
+Cart.belongsToMany(Product, { through: CartItem });
+
 const createTable = async () => {
     try {
-        await sequelize.sync({ force: true });
+        // await sequelize.sync({ force: true });
+        await sequelize.sync();
         const user = await User.findOne({ where: { id: 1 } });
         if (user) {
             console.log("Found User");
@@ -60,11 +68,12 @@ const createTable = async () => {
             name: "Max",
             email: "max@gmail.com",
         });
+        console.log("Tables created");
+        return await user.createCart();
     } catch (error) {
         console.log("error", error);
         return;
     }
-    console.log("Tables created");
 };
 // createTable();
 
