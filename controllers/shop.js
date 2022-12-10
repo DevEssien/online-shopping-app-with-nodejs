@@ -62,42 +62,26 @@ const getProductDetails = async (req, res, next) => {
 };
 
 const getCart = async (req, res, next) => {
-    const cart = await req.user.getCart();
+    const cart = await req.user?.getCart();
+    // if (cart === null) {
+
+    // }
     const products = await cart.getProducts();
     res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
     });
-
-    // Cart.getCart((cart) => {
-    //     const cartProducts = [];
-    //     Product.fetchAll((products) => {
-    //         for (const product of products) {
-    //             const cartProductData = cart?.products.find(
-    //                 (prod) => prod.id == product?.id
-    //             );
-    //             if (cartProductData) {
-    //                 cartProducts.push({
-    //                     productData: product,
-    //                     qty: product?.qty,
-    //                 });
-    //             }
-    //         }
-    //         res.render("shop/cart", {
-    //             path: "/cart",
-    //             pageTitle: "Your Cart",
-    //             products: cartProducts,
-    //         });
-    //     });
-    // });
 };
 
-const getOrders = (req, res, next) => {
+const getOrders = async (req, res, next) => {
+    const orders = await req.user.getOrders({ include: ["Products"] });
     res.render("shop/orders", {
         pageTitle: "Your Order",
         path: "/orders",
+        orders: orders,
     });
+    // console.log(orders.OrderItem);
 };
 
 const getCheckout = (req, res, next) => {
@@ -139,6 +123,20 @@ const postDelCartItems = async (req, res, next) => {
     res.redirect("/cart");
 };
 
+const postCreateOrder = async (req, res, next) => {
+    const cart = await req.user.getCart();
+    const products = await cart.getProducts();
+    const order = await req.user.createOrder();
+    await order.addProducts(
+        products.map((product) => {
+            product.OrderItem = { quantity: product.CartItem.quantity };
+            return product;
+        })
+    );
+    await cart.setProducts(null);
+    res.redirect("/orders");
+};
+
 module.exports = {
     getProductList,
     getIndex,
@@ -148,4 +146,5 @@ module.exports = {
     getCheckout,
     postCart,
     postDelCartItems,
+    postCreateOrder,
 };
