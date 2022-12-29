@@ -1,17 +1,8 @@
-// const { Sequelize } = require("sequelize");
-
-// const sequelize = new Sequelize("online_shop", "root", "@mySQL_300", {
-//     dialect: "mysql",
-//     host: "localhost",
-// });
-
-// module.exports = sequelize;
-
 const mongoose = require("mongoose");
 
 mongoose.set("strictQuery", false);
 
-mongoose.connect(
+const mongodb = mongoose.connect(
     "mongodb://localhost:27017/onlineShopDB",
     {
         useNewUrlParser: true,
@@ -22,21 +13,45 @@ mongoose.connect(
         }
     }
 );
+
+module.exports = mongodb;
+
+const userSchema = new mongoose.Schema({
+    username: String,
+    email: String,
+});
+
 const productSchema = new mongoose.Schema({
     title: String,
     imageUrl: String,
     price: String,
     description: String,
+    userId: String,
 });
+
+const cartSchema = new mongoose.Schema({
+    quantity: Number,
+});
+
+const User = mongoose.model("User", userSchema);
 
 const Product = mongoose.model("Product", productSchema);
 
+const Cart = mongoose.model("Cart", cartSchema);
+
 const book = new Product({
-    title: 'merlin',
-    imageUrl: 'photo.com',
-    price: '34.3',
-    description: 'this book is about a boy with magical powers to protect the prince of camelot from danger'
-})
+    title: "merlin",
+    imageUrl: "photo.com",
+    price: "34.3",
+    description:
+        "this book is about a boy with magical powers to protect the prince of camelot from danger",
+});
 // book.save()
 
-module.exports = Product;
+const user1 = new User({
+    username: "Essien Emmanuel",
+    email: "essienemma300dev@gmail.com",
+});
+// user1.save();
+
+module.exports = { Product, Cart, User };

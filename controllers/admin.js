@@ -1,4 +1,4 @@
-const Product = require("../utils/database");
+const { Product } = require("../utils/database");
 
 //GET
 const getAddProduct = (req, res, next) => {
@@ -66,14 +66,16 @@ const getEditProduct = (req, res, next) => {
 };
 
 ////POST
-const postAddProduct = async (req, res, next) => {
+const postAddProduct = (req, res, next) => {
     try {
         const { title, imageUrl, description, price } = req?.body;
+        const userId = req?.user[0]?._id; //getting the saved id from the req.user
         const newProduct = new Product({
             title: title,
             imageUrl: imageUrl,
             price: price,
             description: description,
+            userId: userId,
         });
         newProduct.save();
         res.redirect("/admin/products");
@@ -82,7 +84,7 @@ const postAddProduct = async (req, res, next) => {
     }
 };
 
-const postEditProduct = async (req, res, next) => {
+const postEditProduct = (req, res, next) => {
     const {
         productId,
         title: updatedTitle,

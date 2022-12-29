@@ -5,6 +5,7 @@ const {
     getIndex,
     getProductList,
     getProductDetails,
+    getCart,
 } = require("../controllers/shop");
 // const {
 //     getProductList,
@@ -30,7 +31,7 @@ router.get("/products", getProductList);
 
 router.get("/products/:productId", getProductDetails);
 
-// router.get("/cart", getCart);
+router.get("/cart", getCart);
 
 // router.get("/orders", getOrders);
 

@@ -1,5 +1,5 @@
 const { default: mongoose } = require("mongoose");
-const Product = require("../utils/database");
+const { Product, Cart } = require("../utils/database");
 
 const getIndex = (req, res, next) => {
     try {
@@ -76,18 +76,28 @@ const getProductDetails = (req, res, next) => {
     }
 };
 
-// const getCart = async (req, res, next) => {
-//     const cart = await req.user?.getCart();
-//     // if (cart === null) {
-
-//     // }
-//     const products = await cart.getProducts();
-//     res.render("shop/cart", {
-//         path: "/cart",
-//         pageTitle: "Your Cart",
-//         products: products,
-//     });
-// };
+const getCart = async (req, res, next) => {
+    Cart.find((error, cart) => {
+        if (!error) {
+            if (cart === null) {
+                res.redirect("/cart");
+            }
+            Product.find((error, products) => {
+                if (!error) {
+                    res.render("shop/cart", {
+                        path: "/cart",
+                        pageTitle: "Your Cart",
+                        products: products,
+                    });
+                } else {
+                    console.log(error);
+                }
+            });
+        } else {
+            console.log(error);
+        }
+    });
+};
 
 // const getOrders = async (req, res, next) => {
 //     const orders = await req.user.getOrders({ include: ["Products"] });
@@ -164,4 +174,4 @@ const getProductDetails = (req, res, next) => {
 //     postCreateOrder,
 // };
 
-module.exports = { getIndex, getProductList, getProductDetails };
+module.exports = { getIndex, getProductList, getProductDetails, getCart };

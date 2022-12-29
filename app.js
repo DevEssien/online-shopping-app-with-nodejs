@@ -6,10 +6,11 @@ const ejs = require("ejs");
 const path = require("path");
 // const mongoose = require("mongoose");
 
-const Product = require("./utils/database");
+const errorController = require("./controllers/error");
 const shopRoute = require("./routes/shop");
 const adminRoute = require("./routes/admin");
-// const errorController = require("./controllers/error");
+const { Product, User } = require("./utils/database");
+
 // const sequelize = require("./utils/database");
 // const Product = require("./models/product");
 // const User = require("./models/user");
@@ -27,23 +28,29 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(async (req, res, next) => {
-// try {
-//     const user = await User.findOne({
-//         where: { id: 1 },
-//     });
-//     if (!user) {
-//         console.log("No User Found");
-//         return;
-//     }
-//     req.user = user;
-//     next();
-// } catch (error) {
-//     console.log(error);
-// }
-// });
+
+app.use((req, res, next) => {
+    try {
+        User.find({ _id: "63adfe64841ad84c577719be" }, (error, user) => {
+            if (!error) {
+                if (!user) {
+                    console.log("No User Found");
+                    return;
+                }
+                req.user = user;
+                console.log("found user with username: ", user[0]?.username);
+                next();
+            } else {
+                console.log(error);
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
+});
 app.use(shopRoute);
 app.use("/admin", adminRoute);
+app.use(errorController.catchError);
 
 // User.hasMany(Product);
 // Product.belongsTo(User, {
@@ -91,7 +98,7 @@ const createTab = async () => {
     const prod = await Product;
     console.log(prod);
 };
-createTab();
+// createTab();
 
 app.listen(port, () => {
     console.log(`server spinning at port ${port}`);
