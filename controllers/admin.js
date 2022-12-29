@@ -1,4 +1,3 @@
-// const Product = require("../models/product");
 const Product = require("../utils/database");
 
 //GET
@@ -12,7 +11,6 @@ const getAddProduct = (req, res, next) => {
 
 const getProducts = (req, res, next) => {
     try {
-        // const products = await req.user.getProducts();
         Product.find((error, products) => {
             if (!error) {
                 if (!products)
@@ -36,37 +34,38 @@ const getProducts = (req, res, next) => {
     }
 };
 
-// const getEditProduct = async (req, res, next) => {
-//     const editMode = req?.query?.edit;
-//     if (!editMode) {
-//         console.log("redirected");
-//         return res.redirect("/");
-//     }
-//     const productId = req?.params?.productId;
-//     try {
-//         const products = await req.user.getProducts({
-//             where: { id: productId },
-//         });
-//         const product = products[0];
-//         if (!product) {
-//             return res.redirect("/");
-//         }
-//         res.render("admin/edit-product", {
-//             pageTitle: "Edit Product",
-//             path: "/admin/edit-product",
-//             editing: editMode,
-//             product: product,
-//         });
-//     } catch (error) {
-//         console.log("error: ", error);
-//         return res
-//             .status(500)
-//             .send({ status: "Error", message: "Internal Server Error" });
-//     }
-//     ``;
-// };
+const getEditProduct = (req, res, next) => {
+    const editMode = req?.query?.edit;
+    if (!editMode) {
+        console.log("redirected");
+        return res.redirect("/");
+    }
+    const productId = req?.params?.productId;
+    try {
+        Product.find({ _id: productId }, (error, product) => {
+            if (!error) {
+                if (!product) {
+                    return res.redirect("/");
+                }
+                res.render("admin/edit-product", {
+                    pageTitle: "Edit Product",
+                    path: "/admin/edit-product",
+                    editing: editMode,
+                    product: product[0],
+                });
+            } else {
+                console.log(error);
+            }
+        });
+    } catch (error) {
+        console.log("error: ", error);
+        return res
+            .status(500)
+            .send({ status: "Error", message: "Internal Server Error" });
+    }
+};
 
-// //POST
+////POST
 const postAddProduct = async (req, res, next) => {
     try {
         const { title, imageUrl, description, price } = req?.body;
@@ -83,48 +82,56 @@ const postAddProduct = async (req, res, next) => {
     }
 };
 
-// const postEditProduct = async (req, res, next) => {
-//     const {
-//         productId,
-//         title: updatedTitle,
-//         imageUrl: updatedImageUrl,
-//         description: updatedDescription,
-//         price: updatedPrice,
-//     } = req.body;
-//     const product = await Product.findOne({ where: { id: productId } });
-//     product.title = updatedTitle;
-//     product.imageUrl = updatedImageUrl;
-//     product.price = updatedPrice;
-//     product.description = updatedDescription;
-//     await product.save();
-//     res.redirect("/admin/products");
-// };
+const postEditProduct = async (req, res, next) => {
+    const {
+        productId,
+        title: updatedTitle,
+        imageUrl: updatedImageUrl,
+        description: updatedDescription,
+        price: updatedPrice,
+    } = req.body;
 
-// const postDeleteProduct = async (req, res, next) => {
-//     try {
-//         const productId = req?.body?.productId;
-//         const product = await Product.findOne({ where: { id: productId } });
-//         if (!product) {
-//             return res.redirect("/admin/products");
-//         }
-//         await product.destroy();
-//         return res.redirect("/admin/products");
-//     } catch (error) {
-//         console.log("error: ", error);
-//     }
-// };
+    Product.updateOne(
+        { _id: productId },
+        {
+            title: updatedTitle,
+            imageUrl: updatedImageUrl,
+            description: updatedDescription,
+            price: updatedPrice,
+        },
+        (error) => {
+            if (!error) {
+                console.log("updated sucessfully");
+            } else {
+                console.log("something went wrong, error => ", error);
+            }
+        }
+    );
+    res.redirect("/admin/products");
+};
 
-// module.exports = {
-//     getAddProduct,
-//     getProducts,
-//     getEditProduct,
-//     postAddProduct,
-//     postEditProduct,
-//     postDeleteProduct,
-// };
+const postDeleteProduct = async (req, res, next) => {
+    try {
+        const productId = req?.body?.productId;
+        Product.deleteOne({ _id: productId }, (err, product) => {
+            if (err) {
+                console.log(err);
+            }
+            if (!product) {
+                return res.redirect("/admin/products");
+            }
+        });
+        return res.redirect("/admin/products");
+    } catch (error) {
+        console.log("error: ", error);
+    }
+};
 
 module.exports = {
     getAddProduct,
     getProducts,
     postAddProduct,
+    getEditProduct,
+    postEditProduct,
+    postDeleteProduct,
 };
