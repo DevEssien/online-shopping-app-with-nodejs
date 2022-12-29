@@ -4,11 +4,17 @@ const path = require("path");
 const {
     getAddProduct,
     getProducts,
-    getEditProduct,
     postAddProduct,
-    postEditProduct,
-    postDeleteProduct,
 } = require("../controllers/admin");
+
+// const {
+//     getAddProduct,
+//     getProducts,
+//     getEditProduct,
+//     postAddProduct,
+//     postEditProduct,
+//     postDeleteProduct,
+// } = require("../controllers/admin");
 
 const router = express.Router();
 
@@ -17,13 +23,13 @@ router.get("/add-product", getAddProduct);
 
 router.get("/products", getProducts);
 
-router.get("/edit-product/:productId", getEditProduct);
+// router.get("/edit-product/:productId", getEditProduct);
 
-//POST
+// //POST
 router.post("/add-product", postAddProduct);
 
-router.post("/edit-product", postEditProduct);
+// router.post("/edit-product", postEditProduct);
 
-router.post("/delete-product", postDeleteProduct);
+// router.post("/delete-product", postDeleteProduct);
 
 module.exports = router;

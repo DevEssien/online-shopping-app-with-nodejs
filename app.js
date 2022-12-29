@@ -4,10 +4,12 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const path = require("path");
+// const mongoose = require("mongoose");
 
+const Product = require("./utils/database");
 const shopRoute = require("./routes/shop");
 const adminRoute = require("./routes/admin");
-const errorController = require("./controllers/error");
+// const errorController = require("./controllers/error");
 // const sequelize = require("./utils/database");
 // const Product = require("./models/product");
 // const User = require("./models/user");
@@ -25,21 +27,21 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(async (req, res, next) => {
-    try {
-        const user = await User.findOne({
-            where: { id: 1 },
-        });
-        if (!user) {
-            console.log("No User Found");
-            return;
-        }
-        req.user = user;
-        next();
-    } catch (error) {
-        console.log(error);
-    }
-});
+// app.use(async (req, res, next) => {
+// try {
+//     const user = await User.findOne({
+//         where: { id: 1 },
+//     });
+//     if (!user) {
+//         console.log("No User Found");
+//         return;
+//     }
+//     req.user = user;
+//     next();
+// } catch (error) {
+//     console.log(error);
+// }
+// });
 app.use(shopRoute);
 app.use("/admin", adminRoute);
 
@@ -83,7 +85,13 @@ app.use("/admin", adminRoute);
 // createTable();
 
 //catch all errors for all routes and send the error page
-app.use(errorController.catchError);
+// app.use(errorController.catchError);
+
+const createTab = async () => {
+    const prod = await Product;
+    console.log(prod);
+};
+createTab();
 
 app.listen(port, () => {
     console.log(`server spinning at port ${port}`);
