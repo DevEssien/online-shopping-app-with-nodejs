@@ -1,5 +1,5 @@
 const { default: mongoose } = require("mongoose");
-const { Product, Cart } = require("../utils/database");
+const { Product, User } = require("../utils/database");
 
 const getIndex = (req, res, next) => {
     try {
@@ -77,25 +77,24 @@ const getProductDetails = (req, res, next) => {
 };
 
 const getCart = async (req, res, next) => {
-    Cart.find((error, cart) => {
-        if (!error) {
-            if (cart === null) {
-                res.redirect("/cart");
-            }
-            Product.find((error, products) => {
-                if (!error) {
-                    res.render("shop/cart", {
-                        path: "/cart",
-                        pageTitle: "Your Cart",
-                        products: products,
-                    });
-                } else {
-                    console.log(error);
-                }
-            });
-        } else {
-            console.log(error);
-        }
+    // console.log("req.user => ", req.user[0].cart.items[0].productId);
+    // User.updateOne(
+    //     { _id: "63beaf9a42b5cf63d0eedf72" },
+    //     { cart: { items: [{}] } },
+    //     (err) => {
+    //         if (!err) {
+    //             console.log("updated user successfully");
+    //         }
+    //     }
+    // );
+    const userId = req?.user[0]?._id;
+    const user = await User.findOne({ _id: userId });
+    const cart = user?.cart;
+
+    res.render("shop/cart", {
+        path: "/cart",
+        pageTitle: "Your Cart",
+        products: cart,
     });
 };
 
@@ -116,28 +115,125 @@ const getCart = async (req, res, next) => {
 //     });
 // };
 
-// const postCart = async (req, res, next) => {
-//     const productId = req.body.productId;
-//     let fetchedCart;
-//     let newQuantity = 1;
-//     const cart = await req.user.getCart();
-//     const products = await cart.getProducts({ where: { id: productId } });
-//     fetchedCart = cart;
-//     let product;
-//     if (products.length > 0) {
-//         product = products[0];
+// [
+//     {
+//       _id: ObjectId("63aeeda272901c8f49db2c2b"),
+//       username: 'Essien Emmanuel',
+//       email: 'essienemma300dev@gmail.com',
+//       cart: { items: [ { productId: null, quantity: 0 } ] },
+//       __v: 0
 //     }
-//     if (product) {
-//         const oldQuantity = product.CartItem.quantity;
-//         newQuantity = oldQuantity + 1;
-//         await fetchedCart.addProduct(product, {
-//             through: { quantity: newQuantity },
-//         });
+//   ]
+
+//product
+// [
+//     {
+//       _id: ObjectId("63aef14d50b5e01f5dd45376"),
+//       title: 'antman',
+//       imageUrl: 'marvel.com',
+//       price: '245',
+//       description: 'guy can change the atomic structure of his body',
+//       userId: '63aeeda272901c8f49db2c2b',
+//       __v: 0
 //     }
-//     const prod = await Product.findOne({ where: { id: productId } });
-//     await fetchedCart.addProduct(prod, { through: { quantity: newQuantity } });
-//     res.redirect("/cart");
-// };
+//   ]
+
+const postCart = async (req, res, next) => {
+    const productId = req.body.productId;
+    let fetchedCart;
+    let newQuantity = 1;
+    // const cart = await req.user.getCart();
+    const userId = req?.user[0]?._id;
+    const user = await User.findOne({ _id: userId });
+    const product = await Product.findOne({ _id: productId });
+    const cart = user?.cart;
+
+    if (cart.length === 0) {
+        User.updateOne(
+            { _id: userId },
+            {
+                cart: [
+                    {
+                        productId: productId,
+                        quantity: newQuantity,
+                        name: product.title,
+                    },
+                ],
+            },
+            (err) => {
+                if (!err) {
+                    console.log("working");
+                }
+            }
+        );
+        const fetchedUser = await User.findOne({ _id: userId });
+        const updatedCart = fetchedUser?.cart;
+        fetchedCart = updatedCart;
+    } else {
+        cart.forEach((product, ind) => {
+            if (product.id !== productId) {
+                console.log("true");
+                User.updateOne(
+                    { _id: userId },
+                    {
+                        cart: [
+                            { ...fetchedCart },
+                            {
+                                productId: productId,
+                                quantity: newQuantity,
+                                name: product.title,
+                            },
+                        ],
+                    },
+                    (err) => {
+                        if (!err) {
+                            console.log("working too");
+                        }
+                    }
+                );
+            } else {
+                console.log("doing  this");
+                User.updateOne(
+                    { _id: userId },
+                    {
+                        cart: [
+                            { ...fetchedCart },
+                            {
+                                productId: productId,
+                                quantity: newQuantity,
+                                name: product.title,
+                            },
+                        ],
+                    },
+                    (err) => {
+                        if (!err) {
+                            console.log("working too");
+                        }
+                    }
+                );
+            }
+        });
+    }
+
+    console.log("cart", cart);
+
+    // const products = await cart.getProducts({ where: { id: productId } });
+    // fetchedCart = cart;
+    // let product;
+    // if (products.length > 0) {
+    //     product = products[0];
+    // }
+    // if (product) {
+    //     const oldQuantity = product.CartItem.quantity;
+    //     newQuantity = oldQuantity + 1;
+    //     await fetchedCart.addProduct(product, {
+    //         through: { quantity: newQuantity },
+    //     });
+    // }
+    // const prod = await Product.findOne({ where: { id: productId } });
+    // await fetchedCart.addProduct(prod, { through: { quantity: newQuantity } });
+    res.redirect("/cart");
+};
 
 // const postDelCartItems = async (req, res, next) => {
 //     const prodId = req?.body?.productId;
@@ -174,4 +270,10 @@ const getCart = async (req, res, next) => {
 //     postCreateOrder,
 // };
 
-module.exports = { getIndex, getProductList, getProductDetails, getCart };
+module.exports = {
+    getIndex,
+    getProductList,
+    getProductDetails,
+    getCart,
+    postCart,
+};

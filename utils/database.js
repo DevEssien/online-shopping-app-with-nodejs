@@ -19,6 +19,13 @@ module.exports = mongodb;
 const userSchema = new mongoose.Schema({
     username: String,
     email: String,
+    cart: [
+        {
+            productId: String,
+            name: String,
+            quantity: Number,
+        },
+    ],
 });
 
 const productSchema = new mongoose.Schema({
@@ -29,15 +36,9 @@ const productSchema = new mongoose.Schema({
     userId: String,
 });
 
-const cartSchema = new mongoose.Schema({
-    quantity: Number,
-});
-
 const User = mongoose.model("User", userSchema);
 
 const Product = mongoose.model("Product", productSchema);
-
-const Cart = mongoose.model("Cart", cartSchema);
 
 const book = new Product({
     title: "merlin",
@@ -54,4 +55,4 @@ const user1 = new User({
 });
 // user1.save();
 
-module.exports = { Product, Cart, User };
+module.exports = { Product, User };
