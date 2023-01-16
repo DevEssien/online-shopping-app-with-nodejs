@@ -141,12 +141,18 @@ const getCart = async (req, res, next) => {
 const postCart = async (req, res, next) => {
     const productId = req.body.productId;
     let fetchedCart;
+    let updatedCart;
     let newQuantity = 1;
     // const cart = await req.user.getCart();
     const userId = req?.user[0]?._id;
     const user = await User.findOne({ _id: userId });
     const product = await Product.findOne({ _id: productId });
     const cart = user?.cart;
+
+    // const fetchedUser = await User.findOne({ _id: userId });
+    // const updatedCart = fetchedUser?.cart;
+    // fetchedCart = updatedCart;
+    fetchedCart = cart;
 
     if (cart.length === 0) {
         User.updateOne(
@@ -166,18 +172,15 @@ const postCart = async (req, res, next) => {
                 }
             }
         );
-        const fetchedUser = await User.findOne({ _id: userId });
-        const updatedCart = fetchedUser?.cart;
-        fetchedCart = updatedCart;
     } else {
-        cart.forEach((product, ind) => {
-            if (product.id !== productId) {
-                console.log("true");
+        cart.forEach(async (product, ind) => {
+            if (product.productId !== productId) {
+                console.log("fetched product ", product);
                 User.updateOne(
                     { _id: userId },
                     {
                         cart: [
-                            { ...fetchedCart },
+                            ...fetchedCart,
                             {
                                 productId: productId,
                                 quantity: newQuantity,
@@ -193,18 +196,15 @@ const postCart = async (req, res, next) => {
                 );
             } else {
                 console.log("doing  this");
-                User.updateOne(
+
+                product.quantity += 1;
+
+                updatedCart = User.updateOne(
                     { _id: userId },
                     {
-                        cart: [
-                            { ...fetchedCart },
-                            {
-                                productId: productId,
-                                quantity: newQuantity,
-                                name: product.title,
-                            },
-                        ],
+                        cart: [...cart],
                     },
+
                     (err) => {
                         if (!err) {
                             console.log("working too");
@@ -215,7 +215,7 @@ const postCart = async (req, res, next) => {
         });
     }
 
-    console.log("cart", cart);
+    console.log("cart at end of the code ", cart);
 
     // const products = await cart.getProducts({ where: { id: productId } });
     // fetchedCart = cart;
