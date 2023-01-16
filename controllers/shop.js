@@ -143,15 +143,12 @@ const postCart = async (req, res, next) => {
     let fetchedCart;
     let updatedCart;
     let newQuantity = 1;
-    // const cart = await req.user.getCart();
     const userId = req?.user[0]?._id;
     const user = await User.findOne({ _id: userId });
     const product = await Product.findOne({ _id: productId });
+    let prod = product;
     const cart = user?.cart;
 
-    // const fetchedUser = await User.findOne({ _id: userId });
-    // const updatedCart = fetchedUser?.cart;
-    // fetchedCart = updatedCart;
     fetchedCart = cart;
 
     if (cart.length === 0) {
@@ -176,6 +173,8 @@ const postCart = async (req, res, next) => {
         cart.forEach(async (product, ind) => {
             if (product.productId !== productId) {
                 console.log("fetched product ", product);
+                // const product = await Product.findOne({ _id: productId });
+
                 User.updateOne(
                     { _id: userId },
                     {
@@ -184,7 +183,7 @@ const postCart = async (req, res, next) => {
                             {
                                 productId: productId,
                                 quantity: newQuantity,
-                                name: product.title,
+                                name: prod.title,
                             },
                         ],
                     },
