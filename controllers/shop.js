@@ -170,32 +170,8 @@ const postCart = async (req, res, next) => {
             }
         );
     } else {
-        cart.forEach(async (product, ind) => {
-            if (product.productId !== productId) {
-                console.log("fetched product ", product);
-                // const product = await Product.findOne({ _id: productId });
-
-                User.updateOne(
-                    { _id: userId },
-                    {
-                        cart: [
-                            ...fetchedCart,
-                            {
-                                productId: productId,
-                                quantity: newQuantity,
-                                name: prod.title,
-                            },
-                        ],
-                    },
-                    (err) => {
-                        if (!err) {
-                            console.log("working too");
-                        }
-                    }
-                );
-            } else {
-                console.log("doing  this");
-
+        for (let product of cart) {
+            if (product.productId === productId) {
                 product.quantity += 1;
 
                 updatedCart = User.updateOne(
@@ -206,31 +182,33 @@ const postCart = async (req, res, next) => {
 
                     (err) => {
                         if (!err) {
-                            console.log("working too");
+                            console.log("working too much");
                         }
                     }
                 );
+                res.redirect("/cart");
+                return;
             }
-        });
+        }
+        User.updateOne(
+            { _id: userId },
+            {
+                cart: [
+                    ...fetchedCart,
+                    {
+                        productId: productId,
+                        quantity: newQuantity,
+                        name: prod.title,
+                    },
+                ],
+            },
+            (err) => {
+                if (!err) {
+                    console.log("working too");
+                }
+            }
+        );
     }
-
-    console.log("cart at end of the code ", cart);
-
-    // const products = await cart.getProducts({ where: { id: productId } });
-    // fetchedCart = cart;
-    // let product;
-    // if (products.length > 0) {
-    //     product = products[0];
-    // }
-    // if (product) {
-    //     const oldQuantity = product.CartItem.quantity;
-    //     newQuantity = oldQuantity + 1;
-    //     await fetchedCart.addProduct(product, {
-    //         through: { quantity: newQuantity },
-    //     });
-    // }
-    // const prod = await Product.findOne({ where: { id: productId } });
-    // await fetchedCart.addProduct(prod, { through: { quantity: newQuantity } });
     res.redirect("/cart");
 };
 

@@ -38,7 +38,7 @@ app.use((req, res, next) => {
                     return;
                 }
                 req.user = user;
-                console.log("found user with username: ", user[0]?.username);
+                // console.log("found user with username: ", user[0]?.username);
                 next();
             } else {
                 console.log(error);
