@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     cart: [
         {
             productId: String,
-            name: String,
+            title: String,
             quantity: Number,
         },
     ],
@@ -56,3 +56,5 @@ const user1 = new User({
 // user1.save();
 
 module.exports = { Product, User };
+
+//db.users.updateMany({},{$unset: {cart: []}}) to clear cart

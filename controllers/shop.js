@@ -77,16 +77,6 @@ const getProductDetails = (req, res, next) => {
 };
 
 const getCart = async (req, res, next) => {
-    // console.log("req.user => ", req.user[0].cart.items[0].productId);
-    // User.updateOne(
-    //     { _id: "63beaf9a42b5cf63d0eedf72" },
-    //     { cart: { items: [{}] } },
-    //     (err) => {
-    //         if (!err) {
-    //             console.log("updated user successfully");
-    //         }
-    //     }
-    // );
     const userId = req?.user[0]?._id;
     const user = await User.findOne({ _id: userId });
     const cart = user?.cart;
@@ -159,7 +149,7 @@ const postCart = async (req, res, next) => {
                     {
                         productId: productId,
                         quantity: newQuantity,
-                        name: product.title,
+                        title: product.title,
                     },
                 ],
             },
@@ -198,7 +188,7 @@ const postCart = async (req, res, next) => {
                     {
                         productId: productId,
                         quantity: newQuantity,
-                        name: prod.title,
+                        title: prod.title,
                     },
                 ],
             },

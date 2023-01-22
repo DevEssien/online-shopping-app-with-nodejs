@@ -1,4 +1,4 @@
-const { Product } = require("../utils/database");
+const { Product, User } = require("../utils/database");
 
 //GET
 const getAddProduct = (req, res, next) => {
@@ -84,7 +84,11 @@ const postAddProduct = (req, res, next) => {
     }
 };
 
-const postEditProduct = (req, res, next) => {
+const postEditProduct = async (req, res, next) => {
+    const userId = req?.user[0]?._id;
+    const user = await User.findOne({ _id: userId });
+    const cart = user?.cart;
+
     const {
         productId,
         title: updatedTitle,
@@ -109,6 +113,29 @@ const postEditProduct = (req, res, next) => {
             }
         }
     );
+
+    if (cart.length > 0) {
+        for (let product of cart) {
+            if (product.productId === productId) {
+                product.title = updatedTitle;
+
+                updatedCart = User.updateOne(
+                    { _id: userId },
+                    {
+                        cart: [...cart],
+                    },
+
+                    (err) => {
+                        if (!err) {
+                            console.log("updated product title");
+                        }
+                    }
+                );
+                res.redirect("/admin/products");
+                return;
+            }
+        }
+    }
     res.redirect("/admin/products");
 };
 
