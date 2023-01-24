@@ -84,7 +84,7 @@ const getCart = async (req, res, next) => {
     res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
-        products: cart,
+        cart: cart,
     });
 };
 
@@ -202,14 +202,37 @@ const postCart = async (req, res, next) => {
     res.redirect("/cart");
 };
 
-// const postDelCartItems = async (req, res, next) => {
-//     const prodId = req?.body?.productId;
-//     const cart = await req.user.getCart();
-//     const products = await cart.getProducts({ where: { id: prodId } });
-//     const product = products[0];
-//     await product.CartItem.destroy();
-//     res.redirect("/cart");
-// };
+const postDelCartItems = async (req, res, next) => {
+    try {
+        const userId = req?.user[0]?._id;
+        const user = await User.findOne({ _id: userId });
+        const cart = user?.cart;
+        const productId = req?.body?.productId;
+
+        if (cart.length > 0) {
+            const updatedCart = cart.filter((product) => {
+                if (product.productId !== productId) {
+                    return product;
+                }
+            });
+            User.updateOne(
+                { _id: userId },
+                {
+                    cart: [...updatedCart],
+                },
+
+                (err) => {
+                    if (!err) {
+                        console.log("deleted product from cart");
+                    }
+                }
+            );
+            res.redirect("/cart");
+        }
+    } catch (error) {
+        console.log("error: ", error);
+    }
+};
 
 // const postCreateOrder = async (req, res, next) => {
 //     const cart = await req.user.getCart();
@@ -243,4 +266,5 @@ module.exports = {
     getProductDetails,
     getCart,
     postCart,
+    postDelCartItems,
 };

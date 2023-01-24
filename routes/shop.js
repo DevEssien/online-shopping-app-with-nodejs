@@ -7,6 +7,7 @@ const {
     getProductDetails,
     getCart,
     postCart,
+    postDelCartItems,
 } = require("../controllers/shop");
 // const {
 //     getProductList,
@@ -42,7 +43,7 @@ router.get("/cart", getCart);
 //  * POST route
 //  */
 
-// router.post("/cart-delete-items", postDelCartItems);
+router.post("/cart-delete-items", postDelCartItems);
 
 router.post("/cart", postCart);
 
