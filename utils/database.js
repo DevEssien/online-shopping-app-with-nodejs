@@ -36,9 +36,19 @@ const productSchema = new mongoose.Schema({
     userId: String,
 });
 
+const OrderSchema = new mongoose.Schema({
+    items: Array,
+    user: {
+        _id: String,
+        name: String,
+    },
+});
+
 const User = mongoose.model("User", userSchema);
 
 const Product = mongoose.model("Product", productSchema);
+
+const Order = mongoose.model("Order", OrderSchema);
 
 const book = new Product({
     title: "merlin",
@@ -55,6 +65,6 @@ const user1 = new User({
 });
 // user1.save();
 
-module.exports = { Product, User };
+module.exports = { Product, User, Order };
 
 //db.users.updateMany({},{$unset: {cart: []}}) to clear cart

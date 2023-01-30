@@ -1,11 +1,10 @@
 const { default: mongoose } = require("mongoose");
-const { Product, User } = require("../utils/database");
+const { Product, User, Order } = require("../utils/database");
 
 const getIndex = (req, res, next) => {
     try {
         Product.find((error, products) => {
             if (!error) {
-                console.log("products =", products);
                 if (!products)
                     return res
                         .status(404)
@@ -53,7 +52,6 @@ const getProductList = (req, res, next) => {
 
 const getProductDetails = (req, res, next) => {
     const productId = req?.params?.productId;
-    console.log(productId);
     try {
         Product.find({ _id: productId }, (error, products) => {
             if (!error) {
@@ -88,15 +86,18 @@ const getCart = async (req, res, next) => {
     });
 };
 
-// const getOrders = async (req, res, next) => {
-//     const orders = await req.user.getOrders({ include: ["Products"] });
-//     res.render("shop/orders", {
-//         pageTitle: "Your Order",
-//         path: "/orders",
-//         orders: orders,
-//     });
-//     // console.log(orders.OrderItem);
-// };
+const getOrders = async (req, res, next) => {
+    const userId = req?.user[0]?._id;
+    const _id = userId.toString();
+    const orders = await Order.find({ "user._id": _id });
+
+    res.render("shop/orders", {
+        pageTitle: "Your Order",
+        path: "/orders",
+        orders: orders,
+    });
+    console.log(orders);
+};
 
 // const getCheckout = (req, res, next) => {
 //     res.render("shop/checkout", {
@@ -104,29 +105,6 @@ const getCart = async (req, res, next) => {
 //         pageTitle: "Checkout",
 //     });
 // };
-
-// [
-//     {
-//       _id: ObjectId("63aeeda272901c8f49db2c2b"),
-//       username: 'Essien Emmanuel',
-//       email: 'essienemma300dev@gmail.com',
-//       cart: { items: [ { productId: null, quantity: 0 } ] },
-//       __v: 0
-//     }
-//   ]
-
-//product
-// [
-//     {
-//       _id: ObjectId("63aef14d50b5e01f5dd45376"),
-//       title: 'antman',
-//       imageUrl: 'marvel.com',
-//       price: '245',
-//       description: 'guy can change the atomic structure of his body',
-//       userId: '63aeeda272901c8f49db2c2b',
-//       __v: 0
-//     }
-//   ]
 
 const postCart = async (req, res, next) => {
     const productId = req.body.productId;
@@ -234,19 +212,34 @@ const postDelCartItems = async (req, res, next) => {
     }
 };
 
-// const postCreateOrder = async (req, res, next) => {
-//     const cart = await req.user.getCart();
-//     const products = await cart.getProducts();
-//     const order = await req.user.createOrder();
-//     await order.addProducts(
-//         products.map((product) => {
-//             product.OrderItem = { quantity: product.CartItem.quantity };
-//             return product;
-//         })
-//     );
-//     await cart.setProducts(null);
-//     res.redirect("/orders");
-// };
+const postCreateOrder = async (req, res, next) => {
+    const userId = req?.user[0]?._id;
+    const user = await User.findOne({ _id: userId });
+    const cart = user?.cart;
+    const order = {
+        items: cart,
+        user: {
+            _id: userId,
+            name: req?.user[0]?.username,
+        },
+    };
+    await Order.insertMany(order, (err) => {
+        if (!err) {
+            console.log("created an order");
+        } else {
+            console.log("error from order creation", err);
+        }
+    });
+    User.updateMany({ _id: userId, cart: [] }, (err) => {
+        if (!err) {
+            console.log("cart cleared");
+        } else {
+            console.log("error", err);
+        }
+    });
+    res.redirect("/orders");
+    // console.log("next cosole.");
+};
 
 // module.exports = {
 //     getProductList,
@@ -265,6 +258,8 @@ module.exports = {
     getProductList,
     getProductDetails,
     getCart,
+    getOrders,
     postCart,
     postDelCartItems,
+    postCreateOrder,
 };
