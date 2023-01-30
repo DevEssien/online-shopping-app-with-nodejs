@@ -7,21 +7,11 @@ const {
     getProductDetails,
     getCart,
     getOrders,
+    getCheckout,
     postCart,
     postDelCartItems,
     postCreateOrder,
 } = require("../controllers/shop");
-// const {
-//     getProductList,
-//     getIndex,
-//     getProductDetails,
-//     getCart,
-//     getOrders,
-//     getCheckout,
-//     postDelCartItems,
-//     postCart,
-//     postCreateOrder,
-// } = require("../controllers/shop");
 
 const router = express.Router();
 
@@ -39,7 +29,7 @@ router.get("/cart", getCart);
 
 router.get("/orders", getOrders);
 
-// router.get("/checkout", getCheckout);
+router.get("/checkout", getCheckout);
 
 // /**
 //  * POST route

@@ -99,12 +99,12 @@ const getOrders = async (req, res, next) => {
     console.log(orders);
 };
 
-// const getCheckout = (req, res, next) => {
-//     res.render("shop/checkout", {
-//         path: "/checkout",
-//         pageTitle: "Checkout",
-//     });
-// };
+const getCheckout = (req, res, next) => {
+    res.render("shop/checkout", {
+        path: "/checkout",
+        pageTitle: "Checkout",
+    });
+};
 
 const postCart = async (req, res, next) => {
     const productId = req.body.productId;
@@ -238,20 +238,7 @@ const postCreateOrder = async (req, res, next) => {
         }
     });
     res.redirect("/orders");
-    // console.log("next cosole.");
 };
-
-// module.exports = {
-//     getProductList,
-//     getIndex,
-//     getProductDetails,
-//     getCart,
-//     getOrders,
-//     getCheckout,
-//     postCart,
-//     postDelCartItems,
-//     postCreateOrder,
-// };
 
 module.exports = {
     getIndex,
@@ -262,4 +249,5 @@ module.exports = {
     postCart,
     postDelCartItems,
     postCreateOrder,
+    getCheckout,
 };
