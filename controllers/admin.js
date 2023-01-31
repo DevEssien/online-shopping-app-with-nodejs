@@ -1,4 +1,5 @@
-const { Product, User } = require("../utils/database");
+const Product = require("../models/product");
+const User = require("../models/user");
 
 //GET
 const getAddProduct = (req, res, next) => {
@@ -65,11 +66,12 @@ const getEditProduct = (req, res, next) => {
     }
 };
 
-////POST
+// ////POST
 const postAddProduct = (req, res, next) => {
     try {
         const { title, imageUrl, description, price } = req?.body;
-        const userId = req?.user[0]?._id; //getting the saved id from the req.user
+        const userId = req.user[0]?._id; //getting the saved id from the req.user
+        console.log("userId", userId);
         const newProduct = new Product({
             title: title,
             imageUrl: imageUrl,
@@ -87,7 +89,7 @@ const postAddProduct = (req, res, next) => {
 const postEditProduct = async (req, res, next) => {
     const userId = req?.user[0]?._id;
     const user = await User.findOne({ _id: userId });
-    const cart = user?.cart;
+    // const cart = user?.cart;
 
     const {
         productId,
@@ -114,28 +116,28 @@ const postEditProduct = async (req, res, next) => {
         }
     );
 
-    if (cart.length > 0) {
-        for (let product of cart) {
-            if (product.productId === productId) {
-                product.title = updatedTitle;
+    // if (cart.length > 0) {
+    //     for (let product of cart) {
+    //         if (product.productId === productId) {
+    //             product.title = updatedTitle;
 
-                updatedCart = User.updateOne(
-                    { _id: userId },
-                    {
-                        cart: [...cart],
-                    },
+    //             updatedCart = User.updateOne(
+    //                 { _id: userId },
+    //                 {
+    //                     cart: [...cart],
+    //                 },
 
-                    (err) => {
-                        if (!err) {
-                            console.log("updated product title");
-                        }
-                    }
-                );
-                res.redirect("/admin/products");
-                return;
-            }
-        }
-    }
+    //                 (err) => {
+    //                     if (!err) {
+    //                         console.log("updated product title");
+    //                     }
+    //                 }
+    //             );
+    //             res.redirect("/admin/products");
+    //             return;
+    //         }
+    //     }
+    // }
     res.redirect("/admin/products");
 };
 

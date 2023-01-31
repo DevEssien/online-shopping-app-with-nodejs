@@ -4,12 +4,13 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const path = require("path");
+const mongoose = require("mongoose");
 
 const errorController = require("./controllers/error");
 const shopRoute = require("./routes/shop");
-const adminRoute = require("./routes/admin");
-const { Product, User } = require("./utils/database");
 
+const adminRoute = require("./routes/admin");
+const User = require("./models/user");
 const port = 3000;
 
 const app = express();
@@ -22,14 +23,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
     try {
-        User.find({ _id: "63c006b507de2030963c37f0" }, (error, user) => {
+        User.find({ _id: "63d81b0ac5115e98291b11bd" }, (error, user) => {
             if (!error) {
                 if (!user) {
                     console.log("No User Found");
                     return;
                 }
                 req.user = user;
-                // console.log("found user with username: ", user[0]?.username);
                 next();
             } else {
                 console.log(error);
@@ -39,9 +39,40 @@ app.use((req, res, next) => {
         console.log(error);
     }
 });
+
 app.use(shopRoute);
 app.use("/admin", adminRoute);
+
+//creating user if non in the user db
+const createUser = async () => {
+    const user = await User.findOne();
+    if (!user) {
+        const user1 = new User({
+            username: "Essien Emmanuel",
+            email: "essienemma300dev@gmail.com",
+            cart: { items: [] },
+        });
+        user1.save();
+    }
+};
+createUser();
+
 app.use(errorController.catchError);
+
+//connecting to mongodb
+mongoose.set("strictQuery", false);
+
+mongoose.connect(
+    "mongodb://localhost:27017/onlineShopDB",
+    {
+        useNewUrlParser: true,
+    },
+    (err) => {
+        if (!err) {
+            console.log("connected successfully");
+        }
+    }
+);
 
 app.listen(port, () => {
     console.log(`server spinning at port ${port}`);
