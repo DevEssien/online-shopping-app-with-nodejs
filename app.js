@@ -42,6 +42,7 @@ app.use((req, res, next) => {
 
 app.use(shopRoute);
 app.use("/admin", adminRoute);
+// app.use(express.json);
 
 //creating user if non in the user db
 const createUser = async () => {

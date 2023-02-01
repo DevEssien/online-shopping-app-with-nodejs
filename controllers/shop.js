@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
 
@@ -90,18 +91,18 @@ const getCart = async (req, res, next) => {
     });
 };
 
-// const getOrders = async (req, res, next) => {
-//     const userId = req?.user[0]?._id;
-//     const _id = userId.toString();
-//     const orders = await Order.find({ "user._id": _id });
+const getOrders = async (req, res, next) => {
+    const userId = req?.user[0]?._id;
+    const _id = userId.toString();
+    const orders = await Order.find({ "user.userId": userId });
 
-//     res.render("shop/orders", {
-//         pageTitle: "Your Order",
-//         path: "/orders",
-//         orders: orders,
-//     });
-//     console.log(orders);
-// };
+    res.render("shop/orders", {
+        pageTitle: "Your Order",
+        path: "/orders",
+        orders: orders,
+    });
+    // console.log(JSON.stringify(orders, null, 2));
+};
 
 // const getCheckout = (req, res, next) => {
 //     res.render("shop/checkout", {
@@ -129,42 +130,38 @@ const postDelCartItems = async (req, res, next) => {
     }
 };
 
-// const postCreateOrder = async (req, res, next) => {
-//     const userId = req?.user[0]?._id;
-//     const user = await User.findOne({ _id: userId });
-//     const cart = user?.cart;
-//     const order = {
-//         items: cart,
-//         user: {
-//             _id: userId,
-//             name: req?.user[0]?.username,
-//         },
-//     };
-//     await Order.insertMany(order, (err) => {
-//         if (!err) {
-//             console.log("created an order");
-//         } else {
-//             console.log("error from order creation", err);
-//         }
-//     });
-//     User.updateMany({ _id: userId, cart: [] }, (err) => {
-//         if (!err) {
-//             console.log("cart cleared");
-//         } else {
-//             console.log("error", err);
-//         }
-//     });
-//     res.redirect("/orders");
-// };
+const postCreateOrder = async (req, res, next) => {
+    const userId = req?.user[0]?._id;
+
+    const user = await User.findOne({ _id: userId })
+        .populate("cart.items.productId")
+        .exec(); //to get the product using the productId of the user cart collection
+    const products = user.cart.items.map((product) => {
+        return {
+            product: { ...product.productId._doc },
+            quantity: product.quantity,
+        };
+    });
+    const order = new Order({
+        user: {
+            name: user.username,
+            userId: userId,
+        },
+        products: products,
+    });
+    order.save();
+    req.user[0].clearCart();
+    res.redirect("/orders");
+};
 
 module.exports = {
     getIndex,
     getProductList,
     getProductDetails,
     getCart,
-    // getOrders,
+    getOrders,
     postCart,
     postDelCartItems,
-    // postCreateOrder,
+    postCreateOrder,
     // getCheckout,
 };

@@ -12,7 +12,6 @@
                             <h1><%= product.productId.title %></h1>
                             <h1><%= product.quantity %></h1>
                             <form action="/cart-delete-items" method="post">
-                                <%_ console.log('productid in ejs', product.productId._id) _%>
                                 <input type="hidden" name="productId" value="<%= product.productId._id %>">
                                 <button class="btn" type="submit">Delete</button>
                             </form>

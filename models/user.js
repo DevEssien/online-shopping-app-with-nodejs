@@ -45,7 +45,6 @@ userSchema.methods.addToCart = function (product) {
         items: updatedCartItems,
     };
     this.cart = updatedCart;
-    console.log("this.cart ", this.cart);
     return this.save();
 };
 
@@ -56,6 +55,11 @@ userSchema.methods.deleteCartItem = function (productId) {
         }
     });
     this.cart.items = updatedCart;
+    return this.save();
+};
+
+userSchema.methods.clearCart = function () {
+    this.cart = { items: [] };
     return this.save();
 };
 
