@@ -1,7 +1,8 @@
 const { default: mongoose } = require("mongoose");
 const Product = require("../models/product");
+const User = require("../models/user");
 
-const getIndex = (req, res, next) => {
+const getIndex = async (req, res, next) => {
     try {
         Product.find((error, products) => {
             if (!error) {
@@ -50,41 +51,44 @@ const getProductList = (req, res, next) => {
     }
 };
 
-// const getProductDetails = (req, res, next) => {
-//     const productId = req?.params?.productId;
-//     try {
-//         Product.find({ _id: productId }, (error, products) => {
-//             if (!error) {
-//                 if (!products)
-//                     return res
-//                         .status(404)
-//                         .send({ status: "Error", message: "Not Found" });
-//                 res.render("shop/product-detail", {
-//                     path: "/products",
-//                     pageTitle: "Product Details",
-//                     product: products,
-//                 });
-//             }
-//         });
-//     } catch (error) {
-//         console.log("error: ", error);
-//         return res
-//             .status(500)
-//             .send({ status: "Error", message: "Internal Server Error" });
-//     }
-// };
+const getProductDetails = (req, res, next) => {
+    const productId = req?.params?.productId;
+    try {
+        Product.find({ _id: productId }, (error, products) => {
+            if (!error) {
+                if (!products)
+                    return res
+                        .status(404)
+                        .send({ status: "Error", message: "Not Found" });
+                res.render("shop/product-detail", {
+                    path: "/products",
+                    pageTitle: "Product Details",
+                    product: products,
+                });
+            }
+        });
+    } catch (error) {
+        console.log("error: ", error);
+        return res
+            .status(500)
+            .send({ status: "Error", message: "Internal Server Error" });
+    }
+};
 
-// // const getCart = async (req, res, next) => {
-// //     const userId = req?.user[0]?._id;
-// //     const user = await User.findOne({ _id: userId });
-// //     const cart = user?.cart;
+const getCart = async (req, res, next) => {
+    const userId = req?.user[0]?._id;
 
-// //     res.render("shop/cart", {
-// //         path: "/cart",
-// //         pageTitle: "Your Cart",
-// //         cart: cart,
-// //     });
-// // };
+    const user = await User.findOne({ _id: userId })
+        .populate("cart.items.productId")
+        .exec(); //to get the product using the productId of the user cart collection
+    const cartItems = user.cart.items;
+
+    res.render("shop/cart", {
+        path: "/cart",
+        pageTitle: "Your Cart",
+        cart: cartItems,
+    });
+};
 
 // const getOrders = async (req, res, next) => {
 //     const userId = req?.user[0]?._id;
@@ -106,111 +110,24 @@ const getProductList = (req, res, next) => {
 //     });
 // };
 
-// const postCart = async (req, res, next) => {
-//     const productId = req.body.productId;
-//     let fetchedCart;
-//     let updatedCart;
-//     let newQuantity = 1;
-//     const userId = req?.user[0]?._id;
-//     const user = await User.findOne({ _id: userId });
-//     const product = await Product.findOne({ _id: productId });
-//     let prod = product;
-//     const cart = user?.cart;
+const postCart = async function (req, res, next) {
+    const productId = req.body.productId;
+    const user = req?.user[0];
+    const product = await Product.findById(productId);
+    user.addToCart(product);
+    res.redirect("/cart");
+};
 
-//     fetchedCart = cart;
-
-//     if (cart.length === 0) {
-//         User.updateOne(
-//             { _id: userId },
-//             {
-//                 cart: [
-//                     {
-//                         productId: productId,
-//                         quantity: newQuantity,
-//                         title: product.title,
-//                     },
-//                 ],
-//             },
-//             (err) => {
-//                 if (!err) {
-//                     console.log("working");
-//                 }
-//             }
-//         );
-//     } else {
-//         for (let product of cart) {
-//             if (product.productId === productId) {
-//                 product.quantity += 1;
-
-//                 updatedCart = User.updateOne(
-//                     { _id: userId },
-//                     {
-//                         cart: [...cart],
-//                     },
-
-//                     (err) => {
-//                         if (!err) {
-//                             console.log("working too much");
-//                         }
-//                     }
-//                 );
-//                 res.redirect("/cart");
-//                 return;
-//             }
-//         }
-//         User.updateOne(
-//             { _id: userId },
-//             {
-//                 cart: [
-//                     ...fetchedCart,
-//                     {
-//                         productId: productId,
-//                         quantity: newQuantity,
-//                         title: prod.title,
-//                     },
-//                 ],
-//             },
-//             (err) => {
-//                 if (!err) {
-//                     console.log("working too");
-//                 }
-//             }
-//         );
-//     }
-//     res.redirect("/cart");
-// };
-
-// const postDelCartItems = async (req, res, next) => {
-//     try {
-//         const userId = req?.user[0]?._id;
-//         const user = await User.findOne({ _id: userId });
-//         const cart = user?.cart;
-//         const productId = req?.body?.productId;
-
-//         if (cart.length > 0) {
-//             const updatedCart = cart.filter((product) => {
-//                 if (product.productId !== productId) {
-//                     return product;
-//                 }
-//             });
-//             User.updateOne(
-//                 { _id: userId },
-//                 {
-//                     cart: [...updatedCart],
-//                 },
-
-//                 (err) => {
-//                     if (!err) {
-//                         console.log("deleted product from cart");
-//                     }
-//                 }
-//             );
-//             res.redirect("/cart");
-//         }
-//     } catch (error) {
-//         console.log("error: ", error);
-//     }
-// };
+const postDelCartItems = async (req, res, next) => {
+    try {
+        const productId = req.body.productId;
+        const user = req?.user[0];
+        user.deleteCartItem(productId);
+        res.redirect("/cart");
+    } catch (error) {
+        console.log("error: ", error);
+    }
+};
 
 // const postCreateOrder = async (req, res, next) => {
 //     const userId = req?.user[0]?._id;
@@ -243,11 +160,11 @@ const getProductList = (req, res, next) => {
 module.exports = {
     getIndex,
     getProductList,
-    // getProductDetails,
-    // getCart,
+    getProductDetails,
+    getCart,
     // getOrders,
-    // postCart,
-    // postDelCartItems,
+    postCart,
+    postDelCartItems,
     // postCreateOrder,
     // getCheckout,
 };

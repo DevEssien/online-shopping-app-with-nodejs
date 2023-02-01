@@ -1,18 +1,16 @@
 const arr = [
-    { id: 1 },
-    { id: 2 },
-    { id: 3 },
-    { id: 4 },
-    { id: 5 },
-    { id: 6 },
-    { id: 7 },
-    { id: 8 },
+    {
+        productId: 1234,
+        quantity: 1,
+    },
 ];
-const c = 4;
-const a = arr.filter((obj) => {
-    if (obj.id !== c) {
-        console.log(obj);
-        return obj;
-    }
+
+arr.forEach((item, ind) => {
+    const product = {
+        id: 1234,
+        title: "book",
+        description: "just  a book",
+    };
+    arr[ind].productId = product;
 });
-console.log(a);
+console.log(arr);

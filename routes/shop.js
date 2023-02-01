@@ -4,12 +4,12 @@ const path = require("path");
 const {
     getIndex,
     getProductList,
-    // getProductDetails,
-    // getCart,
+    getProductDetails,
+    getCart,
     // getOrders,
     // getCheckout,
-    // postCart,
-    // postDelCartItems,
+    postCart,
+    postDelCartItems,
     // postCreateOrder,
 } = require("../controllers/shop");
 
@@ -23,9 +23,9 @@ router.get("/", getIndex);
 
 router.get("/products", getProductList);
 
-// router.get("/products/:productId", getProductDetails);
+router.get("/products/:productId", getProductDetails);
 
-// router.get("/cart", getCart);
+router.get("/cart", getCart);
 
 // router.get("/orders", getOrders);
 
@@ -35,9 +35,9 @@ router.get("/products", getProductList);
 //  * POST route
 //  */
 
-// router.post("/cart-delete-items", postDelCartItems);
+router.post("/cart-delete-items", postDelCartItems);
 
-// router.post("/cart", postCart);
+router.post("/cart", postCart);
 
 // router.post("/create-order", postCreateOrder);
 
