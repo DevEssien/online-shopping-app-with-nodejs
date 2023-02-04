@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const path = require("path");
 const mongoose = require("mongoose");
+const session = require("express-session");
 
 const errorController = require("./controllers/error");
 
@@ -22,6 +23,13 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+    session({
+        secret: "thisIsMySECRET",
+        resave: false,
+        saveUninitialized: false,
+    })
+);
 
 app.use((req, res, next) => {
     try {
