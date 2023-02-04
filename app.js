@@ -6,6 +6,7 @@ const ejs = require("ejs");
 const path = require("path");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const mongoDBStore = require("connect-mongodb-session")(session);
 
 const errorController = require("./controllers/error");
 
@@ -15,6 +16,7 @@ const authRoute = require("./routes/auth");
 
 const User = require("./models/user");
 const port = 3000;
+const MONGODB_URI = "mongodb://localhost:27017/onlineShopDB";
 
 const app = express();
 
@@ -23,11 +25,17 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const store = new mongoDBStore({
+    uri: MONGODB_URI,
+    collections: "sessions",
+});
 app.use(
     session({
         secret: "thisIsMySECRET",
         resave: false,
         saveUninitialized: false,
+        store: store,
     })
 );
 
@@ -76,7 +84,7 @@ app.use(errorController.catchError);
 mongoose.set("strictQuery", false);
 
 mongoose.connect(
-    "mongodb://localhost:27017/onlineShopDB",
+    MONGODB_URI,
     {
         useNewUrlParser: true,
     },
