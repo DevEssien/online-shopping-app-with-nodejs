@@ -7,9 +7,11 @@ const path = require("path");
 const mongoose = require("mongoose");
 
 const errorController = require("./controllers/error");
-const shopRoute = require("./routes/shop");
 
 const adminRoute = require("./routes/admin");
+const shopRoute = require("./routes/shop");
+const authRoute = require("./routes/auth");
+
 const User = require("./models/user");
 const port = 3000;
 
@@ -40,8 +42,10 @@ app.use((req, res, next) => {
     }
 });
 
-app.use(shopRoute);
 app.use("/admin", adminRoute);
+app.use(shopRoute);
+app.use(authRoute);
+
 // app.use(express.json);
 
 //creating user if non in the user db

@@ -3,10 +3,12 @@ const User = require("../models/user");
 
 //GET
 const getAddProduct = (req, res, next) => {
+    const isLoggedIn = req.get("Cookie").split("=")[1];
     res.render("admin/edit-product", {
         path: "/admin/add-product",
         pageTitle: "Add Product",
         editing: false,
+        isAuthenticated: req.isLoggedIn,
     });
 };
 
@@ -22,6 +24,7 @@ const getProducts = (req, res, next) => {
                     path: "/admin/products",
                     pageTitle: "Admin Products",
                     products: products,
+                    isAuthenticated: req.isLoggedIn,
                 });
             } else {
                 console.log("getProduct Error => ", error);
@@ -53,6 +56,7 @@ const getEditProduct = (req, res, next) => {
                     path: "/admin/edit-product",
                     editing: editMode,
                     product: product[0],
+                    isAuthenticated: req.isLoggedIn,
                 });
             } else {
                 console.log(error);
@@ -115,29 +119,6 @@ const postEditProduct = async (req, res, next) => {
             }
         }
     );
-
-    // if (cart.length > 0) {
-    //     for (let product of cart) {
-    //         if (product.productId === productId) {
-    //             product.title = updatedTitle;
-
-    //             updatedCart = User.updateOne(
-    //                 { _id: userId },
-    //                 {
-    //                     cart: [...cart],
-    //                 },
-
-    //                 (err) => {
-    //                     if (!err) {
-    //                         console.log("updated product title");
-    //                     }
-    //                 }
-    //             );
-    //             res.redirect("/admin/products");
-    //             return;
-    //         }
-    //     }
-    // }
     res.redirect("/admin/products");
 };
 

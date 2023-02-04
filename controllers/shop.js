@@ -15,6 +15,7 @@ const getIndex = async (req, res, next) => {
                     path: "/",
                     pageTitle: "Shop",
                     products: products,
+                    isAuthenticated: req.isLoggedIn,
                 });
             } else {
                 console.log("error occurred");
@@ -41,6 +42,7 @@ const getProductList = (req, res, next) => {
                     path: "/products",
                     pageTitle: "Shop",
                     products: products,
+                    isAuthenticated: req.isLoggedIn,
                 });
             }
         });
@@ -65,6 +67,7 @@ const getProductDetails = (req, res, next) => {
                     path: "/products",
                     pageTitle: "Product Details",
                     product: products,
+                    isAuthenticated: req.isLoggedIn,
                 });
             }
         });
@@ -88,6 +91,7 @@ const getCart = async (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         cart: cartItems,
+        isAuthenticated: req.isLoggedIn,
     });
 };
 
@@ -100,6 +104,7 @@ const getOrders = async (req, res, next) => {
         pageTitle: "Your Order",
         path: "/orders",
         orders: orders,
+        isAuthenticated: req.isLoggedIn,
     });
     // console.log(JSON.stringify(orders, null, 2));
 };

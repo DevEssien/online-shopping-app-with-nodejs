@@ -1,7 +1,7 @@
-
 exports.catchError = (req, res, next) => {
-    res.render('404', {
-        pageTitle: 'Page Not Found', 
-        path: '/404'
+    res.render("404", {
+        pageTitle: "Page Not Found",
+        path: "/404",
+        isAuthenticated: req.isLoggedIn,
     });
-}
+};
