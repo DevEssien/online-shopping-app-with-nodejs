@@ -39,20 +39,14 @@ app.use(
     })
 );
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     try {
-        User.find({ _id: "63da202313c0901164941806" }, (error, user) => {
-            if (!error) {
-                if (!user) {
-                    console.log("No User Found");
-                    return;
-                }
-                req.user = user;
-                next();
-            } else {
-                console.log(error);
-            }
-        });
+        if (!req.session?.user) {
+            return next();
+        }
+        const user = await User.findById(req.session?.user?._id);
+        req.user = user;
+        next();
     } catch (error) {
         console.log(error);
     }

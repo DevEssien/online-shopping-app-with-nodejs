@@ -15,7 +15,7 @@ const getIndex = (req, res, next) => {
                     path: "/",
                     pageTitle: "Shop",
                     products: products,
-                    isAuthenticated: req.isLoggedIn,
+                    isAuthenticated: req.session.isLoggedIn,
                 });
             } else {
                 console.log("error occurred");
@@ -42,7 +42,7 @@ const getProductList = (req, res, next) => {
                     path: "/products",
                     pageTitle: "Shop",
                     products: products,
-                    isAuthenticated: req.isLoggedIn,
+                    isAuthenticated: req.session.isLoggedIn,
                 });
             }
         });
@@ -67,7 +67,7 @@ const getProductDetails = (req, res, next) => {
                     path: "/products",
                     pageTitle: "Product Details",
                     product: products,
-                    isAuthenticated: req.isLoggedIn,
+                    isAuthenticated: req.session.isLoggedIn,
                 });
             }
         });
@@ -80,7 +80,8 @@ const getProductDetails = (req, res, next) => {
 };
 
 const getCart = async (req, res, next) => {
-    const userId = req?.user[0]?._id;
+    const userId = req?.user?._id;
+    console.log(userId);
 
     const user = await User.findOne({ _id: userId })
         .populate("cart.items.productId")
@@ -91,12 +92,12 @@ const getCart = async (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         cart: cartItems,
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
     });
 };
 
 const getOrders = async (req, res, next) => {
-    const userId = req?.user[0]?._id;
+    const userId = req?.user?._id;
     const _id = userId.toString();
     const orders = await Order.find({ "user.userId": userId });
 
@@ -104,7 +105,7 @@ const getOrders = async (req, res, next) => {
         pageTitle: "Your Order",
         path: "/orders",
         orders: orders,
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
     });
     // console.log(JSON.stringify(orders, null, 2));
 };
@@ -118,7 +119,7 @@ const getOrders = async (req, res, next) => {
 
 const postCart = async function (req, res, next) {
     const productId = req.body.productId;
-    const user = req?.user[0];
+    const user = req?.user;
     const product = await Product.findById(productId);
     user.addToCart(product);
     res.redirect("/cart");
@@ -127,7 +128,7 @@ const postCart = async function (req, res, next) {
 const postDelCartItems = async (req, res, next) => {
     try {
         const productId = req.body.productId;
-        const user = req?.user[0];
+        const user = req?.user;
         user.deleteCartItem(productId);
         res.redirect("/cart");
     } catch (error) {
@@ -136,7 +137,7 @@ const postDelCartItems = async (req, res, next) => {
 };
 
 const postCreateOrder = async (req, res, next) => {
-    const userId = req?.user[0]?._id;
+    const userId = req?.user?._id;
 
     const user = await User.findOne({ _id: userId })
         .populate("cart.items.productId")
@@ -154,9 +155,12 @@ const postCreateOrder = async (req, res, next) => {
         },
         products: products,
     });
-    order.save();
-    req.user[0].clearCart();
-    res.redirect("/orders");
+    order.save((err) => {
+        if (!err) {
+            req?.user.clearCart();
+            res.redirect("/orders");
+        }
+    });
 };
 
 module.exports = {

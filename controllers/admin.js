@@ -3,12 +3,11 @@ const User = require("../models/user");
 
 //GET
 const getAddProduct = (req, res, next) => {
-    const isLoggedIn = req.get("Cookie").split("=")[1];
     res.render("admin/edit-product", {
         path: "/admin/add-product",
         pageTitle: "Add Product",
         editing: false,
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
     });
 };
 
@@ -24,7 +23,7 @@ const getProducts = (req, res, next) => {
                     path: "/admin/products",
                     pageTitle: "Admin Products",
                     products: products,
-                    isAuthenticated: req.isLoggedIn,
+                    isAuthenticated: req.session.isLoggedIn,
                 });
             } else {
                 console.log("getProduct Error => ", error);
@@ -56,7 +55,7 @@ const getEditProduct = (req, res, next) => {
                     path: "/admin/edit-product",
                     editing: editMode,
                     product: product[0],
-                    isAuthenticated: req.isLoggedIn,
+                    isAuthenticated: req.session.isLoggedIn,
                 });
             } else {
                 console.log(error);
@@ -74,7 +73,7 @@ const getEditProduct = (req, res, next) => {
 const postAddProduct = (req, res, next) => {
     try {
         const { title, imageUrl, description, price } = req?.body;
-        const userId = req.user[0]?._id; //getting the saved id from the req.user
+        const userId = req.user?._id; //getting the saved id from the req.user
         console.log("userId", userId);
         const newProduct = new Product({
             title: title,
@@ -91,7 +90,7 @@ const postAddProduct = (req, res, next) => {
 };
 
 const postEditProduct = async (req, res, next) => {
-    const userId = req?.user[0]?._id;
+    const userId = req?.user?._id;
     const user = await User.findOne({ _id: userId });
     // const cart = user?.cart;
 
