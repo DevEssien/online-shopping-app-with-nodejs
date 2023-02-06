@@ -1,8 +1,9 @@
-const getLogin = (req, res, next) => {
+const User = require("../models/user");
+
+exports.getLogin = (req, res, next) => {
     const isLoggedIn =
         req.get("Cookie")?.split(";")[0]?.trim()?.split("=")[1] === "true";
     console.log(isLoggedIn);
-    console.log("session", JSON.stringify(req?.session, null, 2));
     res.render("auth/login", {
         path: "/login",
         pageTitle: "login",
@@ -10,10 +11,19 @@ const getLogin = (req, res, next) => {
     });
 };
 
-const postLogin = (req, res, next) => {
+exports.postLogin = async (req, res, next) => {
     // res.setHeader("Set-Cookie", "loggedIn=true; HttpOnly");
+    const user = await User.findById("63da202313c0901164941806");
+    req.session.user = user;
+    console.log(req.session.user);
     req.session.isLoggedIn = true;
     res.redirect("/");
 };
 
-module.exports = { getLogin, postLogin };
+exports.postLogout = (req, res, next) => {
+    req.session.destroy((err) => {
+        console.log(err);
+        res.redirect("/");
+    });
+};
+// module.exports = { getLogin, postLogin };

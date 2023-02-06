@@ -64,7 +64,7 @@ app.use(authRoute);
 
 // app.use(express.json);
 
-//creating user if non in the user db
+/**  creating user if non in the user db */
 const createUser = async () => {
     const user = await User.findOne();
     if (!user) {
@@ -80,7 +80,7 @@ createUser();
 
 app.use(errorController.catchError);
 
-//connecting to mongodb
+/** connecting to mongodb */
 mongoose.set("strictQuery", false);
 
 mongoose.connect(

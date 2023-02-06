@@ -3,7 +3,7 @@ const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
 
-const getIndex = async (req, res, next) => {
+const getIndex = (req, res, next) => {
     try {
         Product.find((error, products) => {
             if (!error) {
