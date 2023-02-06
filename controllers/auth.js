@@ -1,14 +1,18 @@
 const User = require("../models/user");
 
 exports.getLogin = (req, res, next) => {
-    // const isLoggedIn =
-    //     req.get("Cookie")?.split(";")[0]?.trim()?.split("=")[1] === "true";
-    const isLoggedIn = req.session.isLoggedIn;
-    // console.log("isloggedin", isLoggedIn);
     res.render("auth/login", {
         path: "/login",
         pageTitle: "login",
-        isAuthenticated: isLoggedIn,
+        isAuthenticated: false,
+    });
+};
+
+exports.getSignup = (req, res, next) => {
+    res.render("auth/signup", {
+        path: "/signup",
+        pageTitle: "Signup page",
+        isAuthenticated: false,
     });
 };
 
@@ -24,7 +28,6 @@ exports.postLogin = async (req, res, next) => {
             console.log(err);
         }
     });
-    // res.redirect("/");
 };
 
 exports.postLogout = (req, res, next) => {
