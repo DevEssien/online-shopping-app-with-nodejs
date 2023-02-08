@@ -13,6 +13,8 @@ const {
     postCreateOrder,
 } = require("../controllers/shop");
 
+const isAuth = require("../middlewares/is-auth");
+
 const router = express.Router();
 
 /**
@@ -25,9 +27,9 @@ router.get("/products", getProductList);
 
 router.get("/products/:productId", getProductDetails);
 
-router.get("/cart", getCart);
+router.get("/cart", isAuth, getCart);
 
-router.get("/orders", getOrders);
+router.get("/orders", isAuth, getOrders);
 
 // router.get("/checkout", getCheckout);
 
@@ -35,10 +37,10 @@ router.get("/orders", getOrders);
 //  * POST route
 //  */
 
-router.post("/cart-delete-items", postDelCartItems);
+router.post("/cart-delete-items", isAuth, postDelCartItems);
 
-router.post("/cart", postCart);
+router.post("/cart", isAuth, postCart);
 
-router.post("/create-order", postCreateOrder);
+router.post("/create-order", isAuth, postCreateOrder);
 
 module.exports = router;
