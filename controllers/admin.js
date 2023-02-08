@@ -82,8 +82,11 @@ const postAddProduct = (req, res, next) => {
             description: description,
             userId: userId,
         });
-        newProduct.save();
-        res.redirect("/admin/products");
+        newProduct.save((err) => {
+            if (!err) {
+                res.redirect("/admin/products");
+            }
+        });
     } catch (error) {
         console.log("error: ", error);
     }

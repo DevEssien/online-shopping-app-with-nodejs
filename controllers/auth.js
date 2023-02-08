@@ -36,4 +36,24 @@ exports.postLogout = (req, res, next) => {
         res.redirect("/");
     });
 };
+
+exports.postSignup = async (req, res, next) => {
+    const { username, email, password, confirmedPassword } = req?.body;
+    console.log(email, password, confirmedPassword);
+    const foundUser = await User.findOne({ email: email });
+    if (foundUser) {
+        return res.redirect("/signup");
+    }
+    const user = new User({
+        email: email,
+        password: password,
+        cart: { items: [] },
+    });
+    return user.save((err) => {
+        if (!err) {
+            res.redirect("/login");
+        }
+    });
+};
+
 // module.exports = { getLogin, postLogin };

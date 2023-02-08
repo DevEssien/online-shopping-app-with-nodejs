@@ -9,18 +9,19 @@
     <main>
         <form class="login-form" action="/signup" method="POST">
             <div class="form-control">
-                <label for="email">email</label>
+                <label for="email">E-Mail</label>
                 <input type="text" name="email" id="email">
             </div>
             <div class="form-control">
-                <label for="password">password</label>
+                <label for="password">Password</label>
                 <input type="password" name="password" id="password">
             </div>
             <div class="form-control">
-                <label for="password">confirm password</label>
-                <input type="password" name="password" id="password">
+                <label for="password">Confirm Password</label>
+                <input type="password" name="confirmedPassword" id="password">
             </div>
-            <button class="btn" type="submit">signup</button>
+            <!-- <input type="hidden" name="userId" value="<%= user._id %>"> -->
+            <button class="btn" type="submit">Signup</button>
         </form>
     </main>
 

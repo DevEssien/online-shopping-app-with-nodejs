@@ -98,7 +98,7 @@ const getCart = async (req, res, next) => {
 
 const getOrders = async (req, res, next) => {
     const userId = req?.user?._id;
-    const _id = userId.toString();
+    // const _id = userId.toString();
     const orders = await Order.find({ "user.userId": userId });
 
     res.render("shop/orders", {
@@ -150,7 +150,7 @@ const postCreateOrder = async (req, res, next) => {
     });
     const order = new Order({
         user: {
-            name: user.username,
+            email: user.email,
             userId: userId,
         },
         products: products,
