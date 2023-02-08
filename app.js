@@ -58,20 +58,6 @@ app.use(authRoute);
 
 // app.use(express.json);
 
-/**  creating user if non in the user db */
-// const createUser = async () => {
-//     const user = await User.findOne();
-//     if (!user) {
-//         const user1 = new User({
-//             username: "Essien Emmanuel",
-//             email: "essienemma300dev@gmail.com",
-//             cart: { items: [] },
-//         });
-//         user1.save();
-//     }
-// };
-// createUser();
-
 app.use(errorController.catchError);
 
 /** connecting to mongodb */

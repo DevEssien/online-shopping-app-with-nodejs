@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 
 exports.getLogin = (req, res, next) => {
@@ -17,36 +18,49 @@ exports.getSignup = (req, res, next) => {
 };
 
 exports.postLogin = async (req, res, next) => {
-    const user = await User.findById("63da202313c0901164941806");
-    req.session.user = user;
-    req.session.isLoggedIn = true;
-    //making sure session is true before redirecting
-    req.session.save((err) => {
+    const { email, password } = req?.body;
+    const foundUser = await User.findOne({ email: email });
+    if (!foundUser) {
+        return res.redirect("/login");
+    }
+    await bcrypt.compare(password, foundUser.password, (err, passwordMatch) => {
         if (!err) {
-            res.redirect("/");
-        } else {
-            console.log(err);
+            if (passwordMatch) {
+                req.session.user = foundUser;
+                req.session.isLoggedIn = true;
+                //making sure session is true before redirecting
+                return req.session.save((err) => {
+                    if (!err) {
+                        res.redirect("/");
+                    } else {
+                        console.log(err);
+                    }
+                });
+            }
+            return res.redirect("/login");
         }
     });
 };
 
 exports.postLogout = (req, res, next) => {
     req.session.destroy((err) => {
+        if (!err) {
+            return res.redirect("/");
+        }
         console.log(err);
-        res.redirect("/");
     });
 };
 
 exports.postSignup = async (req, res, next) => {
-    const { username, email, password, confirmedPassword } = req?.body;
-    console.log(email, password, confirmedPassword);
+    const { email, password, confirmedPassword } = req?.body;
     const foundUser = await User.findOne({ email: email });
     if (foundUser) {
         return res.redirect("/signup");
     }
+    const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
         email: email,
-        password: password,
+        password: hashedPassword,
         cart: { items: [] },
     });
     return user.save((err) => {
