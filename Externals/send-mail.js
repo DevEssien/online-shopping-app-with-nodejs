@@ -6,7 +6,7 @@ const mailjet = Mailjet.apiConnect(
     process.env.MJ_API_SECRET
 );
 
-exports.sendmail = async (email) => {
+exports.sendmail = async (email, subject, textPart, htmlPart) => {
     const request = await mailjet.post("send", { version: "v3.1" }).request({
         Messages: [
             {
@@ -20,10 +20,9 @@ exports.sendmail = async (email) => {
                         Name: "Customer",
                     },
                 ],
-                Subject: "Your login in is successful!",
-                TextPart: "Dear Customer, welcome to Essiens store!",
-                HTMLPart:
-                    "<h3>Dear Customer, welcome to Essiens store</h3><br />May the delivery force be with you!",
+                Subject: subject,
+                TextPart: textPart,
+                HTMLPart: htmlPart,
             },
         ],
     });
