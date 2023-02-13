@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
+const Mail = require("../Externals/send-mail");
 
 exports.getLogin = (req, res, next) => {
     let errorMessage = req.flash("error");
@@ -35,6 +36,7 @@ exports.postLogin = async (req, res, next) => {
                 return req.session.save((err) => {
                     if (!err) {
                         res.redirect("/");
+                        Mail.sendmail(email);
                     } else {
                         console.log(err);
                     }

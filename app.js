@@ -9,7 +9,6 @@ const session = require("express-session");
 const mongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
-const Mailjet = require("node-mailjet");
 
 const errorController = require("./controllers/error");
 
