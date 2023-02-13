@@ -79,8 +79,6 @@ const getProductDetails = (req, res, next) => {
 
 const getCart = async (req, res, next) => {
     const userId = req?.user?._id;
-    console.log(userId);
-
     const user = await User.findOne({ _id: userId })
         .populate("cart.items.productId")
         .exec(); //to get the product using the productId of the user cart collection

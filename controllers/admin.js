@@ -10,22 +10,13 @@ const getAddProduct = (req, res, next) => {
     });
 };
 
-const getProducts = (req, res, next) => {
+const getProducts = async (req, res, next) => {
     try {
-        Product.find((error, products) => {
-            if (!error) {
-                if (!products)
-                    return res
-                        .status(404)
-                        .send({ status: "Error", message: "No Record Found" });
-                res.render("admin/products", {
-                    path: "/admin/products",
-                    pageTitle: "Admin Products",
-                    products: products,
-                });
-            } else {
-                console.log("getProduct Error => ", error);
-            }
+        const products = await Product.findOne({ userId: req.user._id})
+        res.render("admin/products", {
+            path: "/admin/products",
+            pageTitle: "Admin Products",
+            products: products === null ? [] : [ products ],
         });
     } catch (error) {
         console.log("error: ", error);
@@ -92,8 +83,6 @@ const postAddProduct = (req, res, next) => {
 const postEditProduct = async (req, res, next) => {
     const userId = req?.user?._id;
     const user = await User.findOne({ _id: userId });
-    // const cart = user?.cart;
-
     const {
         productId,
         title: updatedTitle,
@@ -102,23 +91,23 @@ const postEditProduct = async (req, res, next) => {
         price: updatedPrice,
     } = req.body;
 
-    Product.updateOne(
-        { _id: productId },
-        {
-            title: updatedTitle,
-            imageUrl: updatedImageUrl,
-            description: updatedDescription,
-            price: updatedPrice,
-        },
-        (error) => {
-            if (!error) {
-                console.log("updated sucessfully");
-            } else {
-                console.log("something went wrong, error => ", error);
-            }
+    const product = await Product.findById(productId);
+    if (userId.toString() !== product.userId.toString()) {
+        console.log('not user')
+        return res.redirect('/')
+    }
+    product.title = updatedTitle;
+    product.imageUrl = updatedImageUrl;
+    product.description = updatedDescription;
+    product.price = updatedPrice;
+    return product.save((err) => {
+        if (!err) {  
+            console.log('updated successfully')      
+            res.redirect("/admin/products");
+        } else {
+            console.log("something went wrong, error => ", error)
         }
-    );
-    res.redirect("/admin/products");
+    })
 };
 
 const postDeleteProduct = async (req, res, next) => {
