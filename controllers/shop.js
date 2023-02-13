@@ -15,7 +15,6 @@ const getIndex = (req, res, next) => {
                     path: "/",
                     pageTitle: "Shop",
                     products: products,
-                    isAuthenticated: req.session.isLoggedIn,
                 });
             } else {
                 console.log("error occurred");
@@ -42,7 +41,6 @@ const getProductList = (req, res, next) => {
                     path: "/products",
                     pageTitle: "Shop",
                     products: products,
-                    isAuthenticated: req.session.isLoggedIn,
                 });
             }
         });
@@ -57,7 +55,8 @@ const getProductList = (req, res, next) => {
 const getProductDetails = (req, res, next) => {
     const productId = req?.params?.productId;
     try {
-        Product.find({ _id: productId }, (error, products) => {
+        Product.findById(productId, (error, products) => {
+            console.log("products ", products);
             if (!error) {
                 if (!products)
                     return res
@@ -67,7 +66,6 @@ const getProductDetails = (req, res, next) => {
                     path: "/products",
                     pageTitle: "Product Details",
                     product: products,
-                    isAuthenticated: req.session.isLoggedIn,
                 });
             }
         });
@@ -92,7 +90,6 @@ const getCart = async (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         cart: cartItems,
-        isAuthenticated: req.session.isLoggedIn,
     });
 };
 
@@ -105,7 +102,6 @@ const getOrders = async (req, res, next) => {
         pageTitle: "Your Order",
         path: "/orders",
         orders: orders,
-        isAuthenticated: req.session.isLoggedIn,
     });
     // console.log(JSON.stringify(orders, null, 2));
 };
@@ -148,9 +144,10 @@ const postCreateOrder = async (req, res, next) => {
             quantity: product.quantity,
         };
     });
+    console.log("user", req.user.email);
     const order = new Order({
         user: {
-            email: user.email,
+            email: req.user.email,
             userId: userId,
         },
         products: products,

@@ -5,7 +5,6 @@ exports.getLogin = (req, res, next) => {
     res.render("auth/login", {
         path: "/login",
         pageTitle: "login",
-        isAuthenticated: false,
     });
 };
 
@@ -13,7 +12,6 @@ exports.getSignup = (req, res, next) => {
     res.render("auth/signup", {
         path: "/signup",
         pageTitle: "Signup page",
-        isAuthenticated: false,
     });
 };
 
@@ -42,15 +40,6 @@ exports.postLogin = async (req, res, next) => {
     });
 };
 
-exports.postLogout = (req, res, next) => {
-    req.session.destroy((err) => {
-        if (!err) {
-            return res.redirect("/");
-        }
-        console.log(err);
-    });
-};
-
 exports.postSignup = async (req, res, next) => {
     const { email, password, confirmedPassword } = req?.body;
     const foundUser = await User.findOne({ email: email });
@@ -67,6 +56,15 @@ exports.postSignup = async (req, res, next) => {
         if (!err) {
             res.redirect("/login");
         }
+    });
+};
+
+exports.postLogout = (req, res, next) => {
+    req.session.destroy((err) => {
+        if (!err) {
+            return res.redirect("/");
+        }
+        console.log(err);
     });
 };
 
