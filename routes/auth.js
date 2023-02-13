@@ -9,6 +9,8 @@ router.get("/login", authController.getLogin);
 
 router.get("/signup", authController.getSignup);
 
+router.get("/password-reset", authController.getReset);
+
 /** post route */
 router.post("/login", authController.postLogin);
 

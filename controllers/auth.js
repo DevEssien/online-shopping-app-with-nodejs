@@ -20,6 +20,15 @@ exports.getSignup = (req, res, next) => {
     });
 };
 
+exports.getReset = (req, res, next) => {
+    const errorMessage = req.flash("error");
+    res.render("auth/password-reset", {
+        path: "/password-reset",
+        pageTitle: "password reset",
+        errorMessage: errorMessage.length === 0 ? null : errorMessage[0],
+    });
+};
+
 exports.postLogin = async (req, res, next) => {
     const { email, password } = req?.body;
     const foundUser = await User.findOne({ email: email });
