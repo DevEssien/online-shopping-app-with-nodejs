@@ -10,6 +10,11 @@ exports.getLogin = (req, res, next) => {
         path: "/login",
         pageTitle: "login",
         errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
+        previousInput: {
+            email: "",
+            password: "",
+        },
+        validationErrors: [],
     });
 };
 
@@ -60,9 +65,20 @@ exports.getNewPassword = async (req, res, next) => {
 exports.postLogin = async (req, res, next) => {
     const { email, password } = req?.body;
     const foundUser = await User.findOne({ email: email });
+    const errors = validationResult(req);
     if (!foundUser) {
         req.flash("error", "Invalid Email");
-        return res.redirect("/login");
+        let errorMessage = req.flash("error");
+        return res.status(422).render("auth/login", {
+            path: "/login",
+            pageTitle: "login",
+            errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
+            previousInput: {
+                email: email,
+                password: password,
+            },
+            validationErrors: [],
+        });
     }
     await bcrypt.compare(password, foundUser.password, (err, passwordMatch) => {
         if (!err) {
@@ -86,7 +102,17 @@ exports.postLogin = async (req, res, next) => {
                 });
             }
             req.flash("error", "Invalid Password");
-            return res.redirect("/login");
+            let errorMessage = req.flash("error");
+            return res.status(422).render("auth/login", {
+                path: "/login",
+                pageTitle: "login",
+                errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
+                previousInput: {
+                    email: email,
+                    password: password,
+                },
+                validationErrors: [{ param: "password" }],
+            });
         }
     });
 };
@@ -94,9 +120,6 @@ exports.postLogin = async (req, res, next) => {
 exports.postSignup = async (req, res, next) => {
     const { email, password, confirmedPassword } = req?.body;
     const errors = validationResult(req);
-    const result = errors.array();
-    console.log(result);
-
     if (!errors.isEmpty()) {
         return res.status(422).render("auth/signup", {
             path: "/signup",
