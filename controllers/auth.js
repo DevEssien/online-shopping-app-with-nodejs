@@ -65,7 +65,6 @@ exports.getNewPassword = async (req, res, next) => {
 exports.postLogin = async (req, res, next) => {
     const { email, password } = req?.body;
     const foundUser = await User.findOne({ email: email });
-    const errors = validationResult(req);
     if (!foundUser) {
         req.flash("error", "Invalid Email");
         let errorMessage = req.flash("error");
