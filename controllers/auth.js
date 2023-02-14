@@ -19,6 +19,11 @@ exports.getSignup = (req, res, next) => {
         path: "/signup",
         pageTitle: "Signup page",
         errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
+        previousInput: {
+            email: '',
+            password: '',
+            confirmedPassword: ''
+        }
     });
 };
 
@@ -70,7 +75,7 @@ exports.postLogin = async (req, res, next) => {
                             "Dear Customer, welcome to Essien's store!";
                         const htmlPart =
                             "<h3>Dear Customer, welcome to Essien's store</h3><br />May the delivery force be with you!";
-                        Mail.sendmail(email, subject, textPart, htmlPart);
+                        // Mail.sendmail(email, subject, textPart, htmlPart);
                     } else {
                         console.log(err);
                     }
@@ -84,18 +89,18 @@ exports.postLogin = async (req, res, next) => {
 
 exports.postSignup = async (req, res, next) => {
     const { email, password, confirmedPassword } = req?.body;
-    const foundUser = await User.findOne({ email: email });
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).render("auth/signup", {
             path: "/signup",
             pageTitle: "Signup page",
-            errorMessage: errors.array()[0].msg
+            errorMessage: errors.array()[0].msg,
+            previousInput: { 
+                email: email, 
+                password: password, 
+                confirmedPassword: confirmedPassword
+            }
         });
-    }
-    if (foundUser) {
-        req.flash("error", "Email exists already, Enter another Email");
-        return res.redirect("/signup");
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
