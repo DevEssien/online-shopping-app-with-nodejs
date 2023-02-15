@@ -2,8 +2,9 @@ const { default: mongoose } = require("mongoose");
 const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
+const errorController = require("../controllers/error");
 
-const getIndex = (req, res, next) => {
+exports.getIndex = (req, res, next) => {
     try {
         Product.find((error, products) => {
             if (!error) {
@@ -17,19 +18,15 @@ const getIndex = (req, res, next) => {
                     products: products,
                 });
             } else {
-                console.log("error occurred");
-                console.log("err ", error);
+                errorController.throwError(error);
             }
         });
     } catch (error) {
-        console.log("error: ", error);
-        return res
-            .status(500)
-            .send({ status: "Error", message: "Internal Server Error" });
+        errorController.throwError(error);
     }
 };
 
-const getProductList = (req, res, next) => {
+exports.getProductList = (req, res, next) => {
     try {
         Product.find((error, products) => {
             if (!error) {
@@ -45,14 +42,11 @@ const getProductList = (req, res, next) => {
             }
         });
     } catch (error) {
-        console.log("error: ", error);
-        return res
-            .status(500)
-            .send({ status: "Error", message: "Internal Server Error" });
+        errorController.throwError(error);
     }
 };
 
-const getProductDetails = (req, res, next) => {
+exports.getProductDetails = (req, res, next) => {
     const productId = req?.params?.productId;
     try {
         Product.findById(productId, (error, products) => {
@@ -70,38 +64,43 @@ const getProductDetails = (req, res, next) => {
             }
         });
     } catch (error) {
-        console.log("error: ", error);
-        return res
-            .status(500)
-            .send({ status: "Error", message: "Internal Server Error" });
+        errorController.throwError(error);
     }
 };
 
-const getCart = async (req, res, next) => {
-    const userId = req?.user?._id;
-    const user = await User.findOne({ _id: userId })
-        .populate("cart.items.productId")
-        .exec(); //to get the product using the productId of the user cart collection
-    const cartItems = user.cart.items;
+exports.getCart = async (req, res, next) => {
+    try {
+        const userId = req?.user?._id;
+        const user = await User.findOne({ _id: userId })
+            .populate("cart.items.productId")
+            .exec(); //to get the product using the productId of the user cart collection
+        const cartItems = user.cart.items;
 
-    res.render("shop/cart", {
-        path: "/cart",
-        pageTitle: "Your Cart",
-        cart: cartItems,
-    });
+        res.render("shop/cart", {
+            path: "/cart",
+            pageTitle: "Your Cart",
+            cart: cartItems,
+        });
+    } catch (err) {
+        errorController.throwError(err);
+    }
 };
 
-const getOrders = async (req, res, next) => {
-    const userId = req?.user?._id;
-    // const _id = userId.toString();
-    const orders = await Order.find({ "user.userId": userId });
+exports.getOrders = async (req, res, next) => {
+    try {
+        const userId = req?.user?._id;
+        // const _id = userId.toString();
+        const orders = await Order.find({ "user.userId": userId });
 
-    res.render("shop/orders", {
-        pageTitle: "Your Order",
-        path: "/orders",
-        orders: orders,
-    });
-    // console.log(JSON.stringify(orders, null, 2));
+        res.render("shop/orders", {
+            pageTitle: "Your Order",
+            path: "/orders",
+            orders: orders,
+        });
+        // console.log(JSON.stringify(orders, null, 2));
+    } catch (err) {
+        errorController.throwError(err);
+    }
 };
 
 // const getCheckout = (req, res, next) => {
@@ -111,61 +110,57 @@ const getOrders = async (req, res, next) => {
 //     });
 // };
 
-const postCart = async function (req, res, next) {
-    const productId = req.body.productId;
-    const user = req?.user;
-    const product = await Product.findById(productId);
-    user.addToCart(product);
-    res.redirect("/cart");
+exports.postCart = async function (req, res, next) {
+    try {
+        const productId = req.body.productId;
+        const user = req?.user;
+        const product = await Product.findById(productId);
+        user.addToCart(product);
+        res.redirect("/cart");
+    } catch (err) {
+        errorController.throwError(err);
+    }
 };
 
-const postDelCartItems = async (req, res, next) => {
+exports.postDelCartItems = async (req, res, next) => {
     try {
         const productId = req.body.productId;
         const user = req?.user;
         user.deleteCartItem(productId);
         res.redirect("/cart");
     } catch (error) {
-        console.log("error: ", error);
+        errorController.throwError(error);
     }
 };
 
-const postCreateOrder = async (req, res, next) => {
-    const userId = req?.user?._id;
-
-    const user = await User.findOne({ _id: userId })
-        .populate("cart.items.productId")
-        .exec(); //to get the product using the productId of the user cart collection
-    const products = user.cart.items.map((product) => {
-        return {
-            product: { ...product.productId._doc },
-            quantity: product.quantity,
-        };
-    });
-    console.log("user", req.user.email);
-    const order = new Order({
-        user: {
-            email: req.user.email,
-            userId: userId,
-        },
-        products: products,
-    });
-    order.save((err) => {
-        if (!err) {
-            req?.user.clearCart();
-            res.redirect("/orders");
-        }
-    });
-};
-
-module.exports = {
-    getIndex,
-    getProductList,
-    getProductDetails,
-    getCart,
-    getOrders,
-    postCart,
-    postDelCartItems,
-    postCreateOrder,
-    // getCheckout,
+exports.postCreateOrder = async (req, res, next) => {
+    try {
+        const userId = req?.user?._id;
+        const user = await User.findOne({ _id: userId })
+            .populate("cart.items.productId")
+            .exec(); //to get the product using the productId of the user cart collection
+        const products = user.cart.items.map((product) => {
+            return {
+                product: { ...product.productId._doc },
+                quantity: product.quantity,
+            };
+        });
+        const order = new Order({
+            user: {
+                email: req.user.email,
+                userId: userId,
+            },
+            products: products,
+        });
+        order.save((err) => {
+            if (!err) {
+                req?.user.clearCart();
+                res.redirect("/orders");
+            } else {
+                errorController.throwError(err);
+            }
+        });
+    } catch (err) {
+        errorController.throwError(err);
+    }
 };

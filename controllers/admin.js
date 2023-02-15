@@ -1,6 +1,8 @@
+const mongoose = require("mongoose");
 const Product = require("../models/product");
 const User = require("../models/user");
 const { validationResult } = require("express-validator/check");
+const errorController = require("../controllers/error");
 
 //GET
 exports.getAddProduct = (req, res, next) => {
@@ -17,17 +19,13 @@ exports.getAddProduct = (req, res, next) => {
 exports.getProducts = async (req, res, next) => {
     try {
         const products = await Product.find({ userId: req.user._id });
-        console.log("getProduct", products);
         res.render("admin/products", {
             path: "/admin/products",
             pageTitle: "Admin Products",
             products: products === null ? [] : products,
         });
-    } catch (error) {
-        console.log("error: ", error);
-        return res
-            .status(500)
-            .send({ status: "Error", message: "Internal Server Error" });
+    } catch (err) {
+        errorController.throwError(err);
     }
 };
 
@@ -54,14 +52,11 @@ exports.getEditProduct = (req, res, next) => {
                     validationErrors: [],
                 });
             } else {
-                console.log(error);
+                errorController.throwError(error);
             }
         });
     } catch (error) {
-        console.log("error: ", error);
-        return res
-            .status(500)
-            .send({ status: "Error", message: "Internal Server Error" });
+        errorController.throwError(error);
     }
 };
 
@@ -74,7 +69,7 @@ exports.postAddProduct = (req, res, next) => {
         if (!errors.isEmpty()) {
             return res.status(422).render("admin/edit-product", {
                 pageTitle: "Add Product",
-                path: "/admin/edit-product",
+                path: "/admin/add-product",
                 editing: false,
                 hasError: true,
                 product: {
@@ -97,10 +92,12 @@ exports.postAddProduct = (req, res, next) => {
         newProduct.save((err) => {
             if (!err) {
                 res.redirect("/admin/products");
+            } else {
+                errorController.throwError(err);
             }
         });
     } catch (error) {
-        console.log("error: ", error);
+        errorController.throwError(error);
     }
 };
 
@@ -143,10 +140,9 @@ exports.postEditProduct = async (req, res, next) => {
     product.price = updatedPrice;
     return product.save((err) => {
         if (!err) {
-            console.log("updated successfully");
             res.redirect("/admin/products");
         } else {
-            console.log("something went wrong, error => ", error);
+            errorController.throwError(err);
         }
     });
 };
@@ -156,7 +152,7 @@ exports.postDeleteProduct = async (req, res, next) => {
         const productId = req?.body?.productId;
         Product.deleteOne({ _id: productId }, (err, product) => {
             if (err) {
-                console.log(err);
+                errorController.throwError(err);
             }
             if (!product) {
                 return res.redirect("/admin/products");
@@ -164,6 +160,6 @@ exports.postDeleteProduct = async (req, res, next) => {
         });
         return res.redirect("/admin/products");
     } catch (error) {
-        console.log("error: ", error);
+        errorController.throwError(error);
     }
 };
