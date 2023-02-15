@@ -52,6 +52,9 @@ app.use(async (req, res, next) => {
             return next();
         }
         const user = await User.findById(req.session?.user?._id);
+        if (!user) {
+            return next();
+        }
         req.user = user;
         next();
     } catch (error) {
