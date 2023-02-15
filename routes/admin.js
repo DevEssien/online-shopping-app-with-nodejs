@@ -19,7 +19,6 @@ router.post(
     isAuth,
     [
         body("title").isString().isLength({ min: 3 }).trim(),
-        body("imageUrl").isURL(),
         body("price").isFloat().trim(),
         body("description").isLength({ min: 10, max: 200 }).trim(),
     ],
@@ -31,7 +30,6 @@ router.post(
     isAuth,
     [
         body("title").isString().isLength({ min: 3 }).trim(),
-        body("imageUrl").isURL(),
         body("price").isFloat().trim(),
         body("description").isLength({ min: 10, max: 200 }).trim(),
     ],
