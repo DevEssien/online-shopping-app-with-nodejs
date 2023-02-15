@@ -25,7 +25,7 @@ exports.getProducts = async (req, res, next) => {
             products: products === null ? [] : products,
         });
     } catch (err) {
-        errorController.throwError(err);
+        errorController.throwError(err, next);
     }
 };
 
@@ -52,18 +52,20 @@ exports.getEditProduct = (req, res, next) => {
                     validationErrors: [],
                 });
             } else {
-                errorController.throwError(error);
+                errorController.throwError(error, next);
             }
         });
     } catch (error) {
-        errorController.throwError(error);
+        errorController.throwError(error, next);
     }
 };
 
 // ////POST
 exports.postAddProduct = (req, res, next) => {
     try {
-        const { title, imageUrl, description, price } = req?.body;
+        const { title, description, price } = req?.body;
+        const image = req.file;
+        console.log(image);
         const userId = req.user?._id; //getting the saved id from the req.user
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -74,7 +76,7 @@ exports.postAddProduct = (req, res, next) => {
                 hasError: true,
                 product: {
                     title: title,
-                    imageUrl: imageUrl,
+                    imageUrl: image,
                     price: price,
                     description: description,
                 },
@@ -84,7 +86,7 @@ exports.postAddProduct = (req, res, next) => {
         }
         const newProduct = new Product({
             title: title,
-            imageUrl: imageUrl,
+            imageUrl: image,
             price: price,
             description: description,
             userId: userId,
@@ -93,11 +95,11 @@ exports.postAddProduct = (req, res, next) => {
             if (!err) {
                 res.redirect("/admin/products");
             } else {
-                errorController.throwError(err);
+                errorController.throwError(err, next);
             }
         });
     } catch (error) {
-        errorController.throwError(error);
+        errorController.throwError(error, next);
     }
 };
 
@@ -107,7 +109,7 @@ exports.postEditProduct = async (req, res, next) => {
     const {
         productId,
         title: updatedTitle,
-        imageUrl: updatedImageUrl,
+        image: updatedImageUrl,
         description: updatedDescription,
         price: updatedPrice,
     } = req.body;
@@ -122,7 +124,6 @@ exports.postEditProduct = async (req, res, next) => {
             product: {
                 _id: productId,
                 title: updatedTitle,
-                imageUrl: updatedImageUrl,
                 price: updatedPrice,
                 description: updatedDescription,
             },
@@ -142,7 +143,7 @@ exports.postEditProduct = async (req, res, next) => {
         if (!err) {
             res.redirect("/admin/products");
         } else {
-            errorController.throwError(err);
+            errorController.throwError(err, next);
         }
     });
 };
@@ -152,7 +153,7 @@ exports.postDeleteProduct = async (req, res, next) => {
         const productId = req?.body?.productId;
         Product.deleteOne({ _id: productId }, (err, product) => {
             if (err) {
-                errorController.throwError(err);
+                errorController.throwError(err, next);
             }
             if (!product) {
                 return res.redirect("/admin/products");
@@ -160,6 +161,6 @@ exports.postDeleteProduct = async (req, res, next) => {
         });
         return res.redirect("/admin/products");
     } catch (error) {
-        errorController.throwError(error);
+        errorController.throwError(error, next);
     }
 };
