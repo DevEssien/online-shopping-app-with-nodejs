@@ -46,23 +46,26 @@ app.use(
 app.use(csrfProtection);
 app.use(flash());
 
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
+
 app.use(async (req, res, next) => {
     try {
         if (!req.session?.user) {
             return next();
         }
         const user = await User.findById(req.session?.user?._id);
+        if (!user) {
+            return next();
+        }
         req.user = user;
         next();
     } catch (error) {
-        console.log(error);
+        next(new Error(error));
     }
-});
-
-app.use((req, res, next) => {
-    res.locals.isAuthenticated = req.session.isLoggedIn;
-    res.locals.csrfToken = req.csrfToken();
-    next();
 });
 
 app.use("/admin", adminRoute);
@@ -71,7 +74,17 @@ app.use(authRoute);
 
 // app.use(express.json);
 
-app.use(errorController.catchError);
+app.get("/500", errorController.catch500Error);
+
+app.use(errorController.catch404Error);
+
+app.use((error, req, res, next) => {
+    res.status(500).render("500", {
+        pageTitle: "Server Error",
+        path: "/500",
+        isAuthenticated: req.session.isLoggedIn,
+    });
+});
 
 /** connecting to mongodb */
 mongoose.set("strictQuery", false);
@@ -93,7 +106,3 @@ app.listen(port, () => {
 });
 
 //remember to always branch out and create a new branch to work on a new feature of the project
-
-{
-    /* <input type="hidden" name="_csrf" value="<%=csrfToken%>"> */
-}

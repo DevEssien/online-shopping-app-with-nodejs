@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const Mail = require("../Externals/send-mail");
 const { validationResult } = require("express-validator/check");
+const errorController = require("../controllers/error");
 
 exports.getLogin = (req, res, next) => {
     let errorMessage = req.flash("error");
@@ -49,7 +50,6 @@ exports.getNewPassword = async (req, res, next) => {
         resetToken: token,
         resetTokenExpiration: { $gt: Date.now() },
     });
-    console.log("user from get new password", user);
     if (!user) {
         return res.redirect("/password-reset");
     }
@@ -96,7 +96,7 @@ exports.postLogin = async (req, res, next) => {
                             "<h3>Dear Customer, welcome to Essien's store</h3><br />May the delivery force be with you!";
                         // Mail.sendmail(email, subject, textPart, htmlPart);
                     } else {
-                        console.log(err);
+                        errorController.throwError(err);
                     }
                 });
             }
@@ -141,6 +141,8 @@ exports.postSignup = async (req, res, next) => {
     return user.save((err) => {
         if (!err) {
             res.redirect("/login");
+        } else {
+            errorController.throwError(err);
         }
     });
 };
@@ -162,6 +164,8 @@ exports.postReset = async (req, res, next) => {
         user.save((err) => {
             if (!err) {
                 res.redirect("/");
+            } else {
+                errorController.throwError(err);
             }
         });
         //sending an email for password reset
@@ -179,7 +183,6 @@ exports.postReset = async (req, res, next) => {
 
 exports.postNewPassword = async (req, res, next) => {
     const { userId, passwordToken, newPassword } = req.body;
-    console.log("user ", userId);
     const user = await User.findOne({
         _id: userId,
         resetToken: passwordToken,
@@ -191,7 +194,7 @@ exports.postNewPassword = async (req, res, next) => {
     user.resetTokenExpiration = undefined;
     user.save((err) => {
         if (!err) {
-            return res.redirect("/login");
+            res.redirect("/login");
             const subject = "Password Reset";
             const textPart =
                 "Dear Customer, welcome to Essien's security services!";
@@ -207,7 +210,7 @@ exports.postLogout = (req, res, next) => {
         if (!err) {
             return res.redirect("/");
         }
-        console.log(err);
+        errorController.throwError(err);
     });
 };
 
