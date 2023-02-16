@@ -5,44 +5,73 @@ const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
 const errorController = require("../controllers/error");
+const PDFDocument = require("pdfkit");
 
-exports.getIndex = (req, res, next) => {
+const ITEMS_PER_PAGE = 3;
+
+exports.getIndex = async (req, res, next) => {
     try {
-        Product.find((error, products) => {
-            if (!error) {
-                if (!products)
-                    return res
-                        .status(404)
-                        .send({ status: "Error", message: "No Record Found" });
-                res.render("shop/index", {
-                    path: "/",
-                    pageTitle: "Shop",
-                    products: products,
-                });
-            } else {
-                errorController.throwError(error);
-            }
+        const page = +req.query.page || 1;
+        const totalProductNum = await Product.find().countDocuments();
+        const products = await Product.find()
+            .skip((page - 1) * ITEMS_PER_PAGE)
+            .limit(ITEMS_PER_PAGE);
+        if (!products)
+            return res
+                .status(404)
+                .send({ status: "Error", message: "No Record Found" });
+        res.render("shop/index", {
+            path: "/",
+            pageTitle: "Shop",
+            products: products,
+            currentPage: page,
+            hasNextPage: ITEMS_PER_PAGE * page < totalProductNum,
+            hasPreviousPage: page > 1,
+            nextPage: page + 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(totalProductNum / ITEMS_PER_PAGE),
         });
     } catch (error) {
         errorController.throwError(error);
     }
 };
 
-exports.getProductList = (req, res, next) => {
+exports.getProductList = async (req, res, next) => {
     try {
-        Product.find((error, products) => {
-            if (!error) {
-                if (!products)
-                    return res
-                        .status(404)
-                        .send({ status: "Error", message: "No Record Found" });
-                res.render("shop/product-list", {
-                    path: "/products",
-                    pageTitle: "Shop",
-                    products: products,
-                });
-            }
+        const page = +req.query.page || 1;
+        const totalProductNum = await Product.find().countDocuments();
+        const products = await Product.find()
+            .skip((page - 1) * ITEMS_PER_PAGE)
+            .limit(ITEMS_PER_PAGE);
+        if (!products)
+            return res
+                .status(404)
+                .send({ status: "Error", message: "No Record Found" });
+        res.render("shop/product-list", {
+            path: "/products",
+            pageTitle: "Shop",
+            products: products,
+            currentPage: page,
+            hasNextPage: ITEMS_PER_PAGE * page < totalProductNum,
+            hasPreviousPage: page > 1,
+            nextPage: page + 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(totalProductNum / ITEMS_PER_PAGE),
         });
+        /////////////////////////////////
+        // Product.find((error, products) => {
+        //     if (!error) {
+        //         if (!products)
+        //             return res
+        //                 .status(404)
+        //                 .send({ status: "Error", message: "No Record Found" });
+        //         res.render("shop/product-list", {
+        //             path: "/products",
+        //             pageTitle: "Shop",
+        //             products: products,
+        //         });
+        //     }
+        // });
     } catch (error) {
         errorController.throwError(error);
     }
@@ -114,19 +143,54 @@ exports.getInvoice = async (req, res, next) => {
         if (order?.user?.userId.toString() !== req?.user?._id.toString()) {
             return next(new Error("Unauthorized"));
         }
+
         const invoiceName = "invoice-" + orderId + ".pdf";
         const invoicePath = path.join("data", "invoices", invoiceName);
-        fs.readFile(invoicePath, (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            res.setHeader("content-Type", "application/pdf");
-            res.setHeader(
-                "content-Disposition",
-                'attachment; filename= "' + invoiceName + '"'
-            );
-            res.status(200).send(data);
+
+        const pdfDoc = new PDFDocument();
+        pdfDoc.pipe(fs.createWriteStream(invoicePath));
+
+        res.setHeader("content-Type", "application/pdf");
+        res.setHeader(
+            "content-Disposition",
+            'attachment; filename= "' + invoiceName + '"'
+        );
+
+        pdfDoc.pipe(res);
+
+        pdfDoc.fontSize(26).text("Invoice", {
+            underline: true,
         });
+        pdfDoc.fontSize(14).text("---------------------------");
+
+        let totalPrice = 0;
+        order.products.forEach((product) => {
+            pdfDoc
+                .fontSize(14)
+                .text(
+                    `item - ${product.product.title} x ${product.quantity} ($${product.product.price})`
+                );
+            totalPrice += product.quantity * Number(product.product.price);
+        });
+
+        pdfDoc.text("----");
+
+        pdfDoc.fontSize(14).text(`Total Price: $${totalPrice}`);
+        pdfDoc.end();
+        // fs.readFile(invoicePath, (err, data) => {
+        //     if (err) {
+        //         return next(err);
+        //     }
+        //     res.setHeader("content-Type", "application/pdf");
+        //     res.setHeader(
+        //         "content-Disposition",
+        //         'attachment; filename= "' + invoiceName + '"'
+        //     );
+        //     res.status(200).send(data);
+        // });
+        // const file = fs.createReadStream(invoicePath);
+
+        // file.pipe(res);
     } catch (err) {
         errorController.throwError(err, next);
     }

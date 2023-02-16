@@ -3,6 +3,10 @@ const Product = require("../models/product");
 const User = require("../models/user");
 const { validationResult } = require("express-validator/check");
 const errorController = require("../controllers/error");
+const fileHandler = require("../utils/file");
+const product = require("../models/product");
+
+const ITEMS_PER_PAGE = 3;
 
 //GET
 exports.getAddProduct = (req, res, next) => {
@@ -18,6 +22,18 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
     try {
+        // const page = +req.query.page || 1;
+        // const totalProductNum = await Product.find({
+        //     userId: req.user._id,
+        // }).countDocuments();
+        // const products = await Product.find()
+        //     .skip((page - 1) * ITEMS_PER_PAGE)
+        //     .limit(ITEMS_PER_PAGE);
+        // if (!products)
+        //     return res
+        //         .status(404)
+        //         .send({ status: "Error", message: "No Record Found" });
+        /////////////////////////
         const products = await Product.find({ userId: req.user._id });
         res.render("admin/products", {
             path: "/admin/products",
@@ -154,6 +170,7 @@ exports.postEditProduct = async (req, res, next) => {
     }
     product.title = updatedTitle;
     if (image) {
+        fileHandler.deleteFile(product.imageUrl);
         product.imageUrl = image.path;
     }
     product.description = updatedDescription;
@@ -170,6 +187,11 @@ exports.postEditProduct = async (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
     try {
         const productId = req?.body?.productId;
+        const product = await Product.findById(productId);
+        if (!product) {
+            return next(new Error("No product found"));
+        }
+        fileHandler.deleteFile(product.imageUrl);
         Product.deleteOne({ _id: productId }, (err, product) => {
             if (err) {
                 errorController.throwError(err, next);
@@ -180,6 +202,6 @@ exports.postDeleteProduct = async (req, res, next) => {
         });
         return res.redirect("/admin/products");
     } catch (error) {
-        errorController.throwError(error, next);
+        next(error);
     }
 };
