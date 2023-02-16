@@ -65,9 +65,27 @@ exports.postAddProduct = (req, res, next) => {
     try {
         const { title, description, price } = req?.body;
         const image = req.file;
-        console.log(image);
+        if (!image) {
+            return res.status(422).render("admin/edit-product", {
+                pageTitle: "Add Product",
+                path: "/admin/add-product",
+                editing: false,
+                hasError: true,
+                product: {
+                    title: title,
+                    price: price,
+                    description: description,
+                },
+                errorMessage: "Attached file is not an image",
+                validationErrors: [],
+            });
+        }
+
+        const imageUrl = image.path;
+
         const userId = req.user?._id; //getting the saved id from the req.user
         const errors = validationResult(req);
+
         if (!errors.isEmpty()) {
             return res.status(422).render("admin/edit-product", {
                 pageTitle: "Add Product",
@@ -76,7 +94,6 @@ exports.postAddProduct = (req, res, next) => {
                 hasError: true,
                 product: {
                     title: title,
-                    imageUrl: image,
                     price: price,
                     description: description,
                 },
@@ -86,7 +103,7 @@ exports.postAddProduct = (req, res, next) => {
         }
         const newProduct = new Product({
             title: title,
-            imageUrl: image,
+            imageUrl: imageUrl,
             price: price,
             description: description,
             userId: userId,
@@ -109,10 +126,10 @@ exports.postEditProduct = async (req, res, next) => {
     const {
         productId,
         title: updatedTitle,
-        image: updatedImageUrl,
         description: updatedDescription,
         price: updatedPrice,
     } = req.body;
+    const image = req.file;
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -136,7 +153,9 @@ exports.postEditProduct = async (req, res, next) => {
         return res.redirect("/");
     }
     product.title = updatedTitle;
-    product.imageUrl = updatedImageUrl;
+    if (image) {
+        product.imageUrl = image.path;
+    }
     product.description = updatedDescription;
     product.price = updatedPrice;
     return product.save((err) => {
