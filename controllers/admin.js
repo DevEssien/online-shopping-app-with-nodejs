@@ -6,6 +6,8 @@ const errorController = require("../controllers/error");
 const fileHandler = require("../utils/file");
 const product = require("../models/product");
 
+const ITEMS_PER_PAGE = 3;
+
 //GET
 exports.getAddProduct = (req, res, next) => {
     res.render("admin/edit-product", {
@@ -20,6 +22,18 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
     try {
+        // const page = +req.query.page || 1;
+        // const totalProductNum = await Product.find({
+        //     userId: req.user._id,
+        // }).countDocuments();
+        // const products = await Product.find()
+        //     .skip((page - 1) * ITEMS_PER_PAGE)
+        //     .limit(ITEMS_PER_PAGE);
+        // if (!products)
+        //     return res
+        //         .status(404)
+        //         .send({ status: "Error", message: "No Record Found" });
+        /////////////////////////
         const products = await Product.find({ userId: req.user._id });
         res.render("admin/products", {
             path: "/admin/products",
