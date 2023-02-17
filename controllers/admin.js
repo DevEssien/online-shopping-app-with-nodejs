@@ -35,6 +35,7 @@ exports.getProducts = async (req, res, next) => {
         //         .send({ status: "Error", message: "No Record Found" });
         /////////////////////////
         const products = await Product.find({ userId: req.user._id });
+        console.log("entering", products);
         res.render("admin/products", {
             path: "/admin/products",
             pageTitle: "Admin Products",
@@ -184,9 +185,9 @@ exports.postEditProduct = async (req, res, next) => {
     });
 };
 
-exports.postDeleteProduct = async (req, res, next) => {
+exports.deleteProduct = async (req, res, next) => {
     try {
-        const productId = req?.body?.productId;
+        const productId = req?.params?.productId;
         const product = await Product.findById(productId);
         if (!product) {
             return next(new Error("No product found"));
@@ -200,8 +201,8 @@ exports.postDeleteProduct = async (req, res, next) => {
                 return res.redirect("/admin/products");
             }
         });
-        return res.redirect("/admin/products");
+        return res.status(200).json({ message: "successful!" });
     } catch (error) {
-        next(error);
+        return res.status(500).json({ message: "product delete failed!" });
     }
 };
