@@ -11,6 +11,7 @@
                     <article class="card product-item">
                         <header class="card__header">
                             <h1 class="product__title"><%= product.title %></h1>
+                            <% console.log('product title', product.title) %>
                         </header>
                         <div class="card__image">
                             <img src="/<%= product.imageUrl %>"
@@ -22,19 +23,17 @@
                         </div>
                         <div class="card__actions">
                             <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
-                            <form action="/admin/delete-product" method="POST">
-                                <input type="hidden" value="<%= product._id %>" name="productId">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <button class="btn" type="submit">Delete</button>
-                            </form>
+                            <input type="hidden" value="<%= product._id %>" name="productId">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button class="btn" type="button" onclick="deleteProduct(this)">Delete</button>
                         </div>
                     </article>
                 <% }) %>  
             </div>
-            <!-- <%- include('../includes/pagination', { currentPage: currentPage, previousPage: previousPage, nextPage: nextPage, lastPage: lastPage, hasPreviousPage: hasPreviousPage, hasNextPage: hasNextPage }) %> -->
         <% } else { %>
             <h1>No Product Found!</h1>
         <% } %>
 
 <%- include('../includes/end.ejs') %>
+<script src="/js/admin.js"></script>
 

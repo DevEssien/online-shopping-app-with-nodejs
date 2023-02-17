@@ -35,6 +35,7 @@ exports.getProducts = async (req, res, next) => {
         //         .send({ status: "Error", message: "No Record Found" });
         /////////////////////////
         const products = await Product.find({ userId: req.user._id });
+        console.log("entering", products);
         res.render("admin/products", {
             path: "/admin/products",
             pageTitle: "Admin Products",
