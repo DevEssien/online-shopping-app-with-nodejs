@@ -35,7 +35,6 @@ exports.getProducts = async (req, res, next) => {
         //         .send({ status: "Error", message: "No Record Found" });
         /////////////////////////
         const products = await Product.find({ userId: req.user._id });
-        console.log("entering", products);
         res.render("admin/products", {
             path: "/admin/products",
             pageTitle: "Admin Products",
@@ -49,7 +48,6 @@ exports.getProducts = async (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
     const editMode = req?.query?.edit;
     if (!editMode) {
-        console.log("redirected");
         return res.redirect("/");
     }
     const productId = req?.params?.productId;
@@ -169,11 +167,11 @@ exports.postEditProduct = async (req, res, next) => {
     if (userId.toString() !== product.userId.toString()) {
         return res.redirect("/");
     }
-    product.title = updatedTitle;
     if (image) {
         fileHandler.deleteFile(product.imageUrl);
         product.imageUrl = image.path;
     }
+    product.title = updatedTitle;
     product.description = updatedDescription;
     product.price = updatedPrice;
     return product.save((err) => {

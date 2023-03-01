@@ -58,20 +58,6 @@ exports.getProductList = async (req, res, next) => {
             previousPage: page - 1,
             lastPage: Math.ceil(totalProductNum / ITEMS_PER_PAGE),
         });
-        /////////////////////////////////
-        // Product.find((error, products) => {
-        //     if (!error) {
-        //         if (!products)
-        //             return res
-        //                 .status(404)
-        //                 .send({ status: "Error", message: "No Record Found" });
-        //         res.render("shop/product-list", {
-        //             path: "/products",
-        //             pageTitle: "Shop",
-        //             products: products,
-        //         });
-        //     }
-        // });
     } catch (error) {
         errorController.throwError(error);
     }
@@ -117,6 +103,31 @@ exports.getCart = async (req, res, next) => {
     }
 };
 
+exports.getCheckout = async (req, res, next) => {
+    try {
+        const userId = req?.user?._id;
+        const user = await User.findOne({ _id: userId })
+            .populate("cart.items.productId")
+            .exec(); //to get the product using the productId of the user cart collection
+        const products = user.cart.items;
+
+        let total = 0;
+        products.forEach((product) => {
+            total += product.quantity * +product.productId.price;
+            console.log(typeof product.productId.price);
+        });
+
+        res.render("shop/checkout", {
+            path: "/checkout",
+            pageTitle: "checkout",
+            cart: products,
+            totalSum: total,
+        });
+    } catch (err) {
+        errorController.throwError(err);
+    }
+};
+
 exports.getOrders = async (req, res, next) => {
     try {
         const userId = req?.user?._id;
@@ -153,7 +164,7 @@ exports.getInvoice = async (req, res, next) => {
         res.setHeader("content-Type", "application/pdf");
         res.setHeader(
             "content-Disposition",
-            'attachment; filename= "' + invoiceName + '"'
+            'attachment; filename= "' + invoiceName + '"',
         );
 
         pdfDoc.pipe(res);
@@ -168,7 +179,7 @@ exports.getInvoice = async (req, res, next) => {
             pdfDoc
                 .fontSize(14)
                 .text(
-                    `item - ${product.product.title} x ${product.quantity} ($${product.product.price})`
+                    `item - ${product.product.title} x ${product.quantity} ($${product.product.price})`,
                 );
             totalPrice += product.quantity * Number(product.product.price);
         });
@@ -195,12 +206,6 @@ exports.getInvoice = async (req, res, next) => {
         errorController.throwError(err, next);
     }
 };
-// const getCheckout = (req, res, next) => {
-//     res.render("shop/checkout", {
-//         path: "/checkout",
-//         pageTitle: "Checkout",
-//     });
-// };
 
 exports.postCart = async function (req, res, next) {
     try {

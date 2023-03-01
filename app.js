@@ -18,8 +18,9 @@ const shopRoute = require("./routes/shop");
 const authRoute = require("./routes/auth");
 
 const User = require("./models/user");
-const port = 3000;
-const MONGODB_URI = "mongodb://localhost:27017/onlineShopDB";
+const port = process.env.PORT || 3000;
+// const MONGODB_URI = "mongodb://localhost:27017/onlineShopDB";
+const MONGODB_URI = `mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@cluster0.zquxsmg.mongodb.net/?retryWrites=true&w=majority`;
 const csrfProtection = csrf();
 
 const fileStorage = multer.diskStorage({
@@ -31,7 +32,7 @@ const fileStorage = multer.diskStorage({
             null,
             new Date().toISOString().replace(/:/g, "-") +
                 "-" +
-                file.originalname
+                file.originalname,
         );
     },
 });
@@ -62,7 +63,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
-    multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
+    multer({ storage: fileStorage, fileFilter: fileFilter }).single("image"),
 );
 
 app.use(
@@ -71,7 +72,7 @@ app.use(
         resave: false,
         saveUninitialized: false,
         store: store,
-    })
+    }),
 );
 
 app.use(csrfProtection);
@@ -129,7 +130,7 @@ mongoose.connect(
         if (!err) {
             console.log("connected successfully");
         }
-    }
+    },
 );
 
 app.listen(port, () => {
