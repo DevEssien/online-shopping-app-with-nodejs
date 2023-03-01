@@ -32,7 +32,7 @@ exports.getIndex = async (req, res, next) => {
             lastPage: Math.ceil(totalProductNum / ITEMS_PER_PAGE),
         });
     } catch (error) {
-        errorController.throwError(error);
+        errorController.throwError(error, next);
     }
 };
 
@@ -59,7 +59,7 @@ exports.getProductList = async (req, res, next) => {
             lastPage: Math.ceil(totalProductNum / ITEMS_PER_PAGE),
         });
     } catch (error) {
-        errorController.throwError(error);
+        errorController.throwError(error, next);
     }
 };
 
@@ -81,7 +81,7 @@ exports.getProductDetails = (req, res, next) => {
             }
         });
     } catch (error) {
-        errorController.throwError(error);
+        errorController.throwError(error, next);
     }
 };
 
@@ -99,7 +99,7 @@ exports.getCart = async (req, res, next) => {
             cart: cartItems,
         });
     } catch (err) {
-        errorController.throwError(err);
+        errorController.throwError(err, next);
     }
 };
 
@@ -124,7 +124,7 @@ exports.getCheckout = async (req, res, next) => {
             totalSum: total,
         });
     } catch (err) {
-        errorController.throwError(err);
+        errorController.throwError(err, next);
     }
 };
 
@@ -215,7 +215,7 @@ exports.postCart = async function (req, res, next) {
         user.addToCart(product);
         res.redirect("/cart");
     } catch (err) {
-        errorController.throwError(err);
+        errorController.throwError(err, next);
     }
 };
 
@@ -226,7 +226,7 @@ exports.postDelCartItems = async (req, res, next) => {
         user.deleteCartItem(productId);
         res.redirect("/cart");
     } catch (error) {
-        errorController.throwError(error);
+        errorController.throwError(error, next);
     }
 };
 
@@ -254,10 +254,10 @@ exports.postCreateOrder = async (req, res, next) => {
                 req?.user.clearCart();
                 res.redirect("/orders");
             } else {
-                errorController.throwError(err);
+                errorController.throwError(err, next);
             }
         });
     } catch (err) {
-        errorController.throwError(err);
+        errorController.throwError(err, next);
     }
 };

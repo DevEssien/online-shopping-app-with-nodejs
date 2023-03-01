@@ -96,7 +96,7 @@ exports.postLogin = async (req, res, next) => {
                             "<h3>Dear Customer, welcome to Essien's store</h3><br />May the delivery force be with you!";
                         // Mail.sendmail(email, subject, textPart, htmlPart);
                     } else {
-                        errorController.throwError(err);
+                        errorController.throwError(err, next);
                     }
                 });
             }
@@ -142,7 +142,7 @@ exports.postSignup = async (req, res, next) => {
         if (!err) {
             res.redirect("/login");
         } else {
-            errorController.throwError(err);
+            errorController.throwError(err, next);
         }
     });
 };
@@ -165,7 +165,7 @@ exports.postReset = async (req, res, next) => {
             if (!err) {
                 res.redirect("/");
             } else {
-                errorController.throwError(err);
+                errorController.throwError(err, next);
             }
         });
         //sending an email for password reset
@@ -210,7 +210,7 @@ exports.postLogout = (req, res, next) => {
         if (!err) {
             return res.redirect("/");
         }
-        errorController.throwError(err);
+        errorController.throwError(err, next);
     });
 };
 
